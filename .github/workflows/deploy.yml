@@ -37,10 +37,10 @@ jobs:
             echo "${{ secrets.ENV_VARS }}" | sudo tee .env > /dev/null
             
             sudo touch docker-compose.yaml
-            echo "${{ vars.DOCKER_COMPOSE }}" | sudo tee docker-compose.yaml > /dev/null
+            echo "${{ vars.DOCKER_COMPOSE }}" | sudo tee docker-compose.yml > /dev/null
             
             sudo chmod 666 /var/run/docker.sock
             sudo docker rm -f $(docker ps -qa)
             sudo docker pull changedan/coffeetime
-            docker-compose -f docker-compose.yaml --env-file ./.env up -d
+            docker-compose -f docker-compose.yml --env-file ./.env up -d
             docker image prune -f
