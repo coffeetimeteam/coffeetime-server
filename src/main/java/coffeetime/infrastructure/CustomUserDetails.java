@@ -17,6 +17,10 @@ public record CustomUserDetails(User user) implements UserDetails {
 		return authorities;
 	}
 
+	public Long getId() {
+		return user.getId();
+	}
+
 	@Override
 	public String getUsername() {
 		return user.getUsername();

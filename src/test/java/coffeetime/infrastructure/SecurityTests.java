@@ -6,8 +6,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import coffeetime.dto.AuthRequest;
 import coffeetime.dto.AuthResponse;
+import coffeetime.dto.LoginRequest;
 import coffeetime.dto.RefreshTokenRequest;
 import coffeetime.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,8 +65,8 @@ public class SecurityTests {
 		final String wrongPassword = "";
 
 		// when
-		AuthRequest authRequest = new AuthRequest(username, wrongPassword);
-		String requestBody = objectMapper.writeValueAsString(authRequest);
+		LoginRequest loginRequest = new LoginRequest(username, wrongPassword);
+		String requestBody = objectMapper.writeValueAsString(loginRequest);
 
 		// then
 		mockMvc.perform(
@@ -80,7 +80,7 @@ public class SecurityTests {
 	@Test
 	public void testGetAccessTokenFail() throws Exception {
 		final String wrongPassword = "wrongPassword";
-		AuthRequest request = new AuthRequest(username, wrongPassword);
+		LoginRequest request = new LoginRequest(username, wrongPassword);
 
 		String requestBody = objectMapper.writeValueAsString(request);
 
@@ -95,7 +95,7 @@ public class SecurityTests {
 
 	@Test
 	public void testGetAccessTokenSuccess() throws Exception {
-		AuthRequest request = new AuthRequest(username, password);
+		LoginRequest request = new LoginRequest(username, password);
 
 		String requestBody = objectMapper.writeValueAsString(request);
 
@@ -120,7 +120,7 @@ public class SecurityTests {
 
 	@Test
 	public void testListSuccess() throws Exception {
-		AuthRequest request = new AuthRequest(username, password);
+		LoginRequest request = new LoginRequest(username, password);
 		String requestBody = objectMapper.writeValueAsString(request);
 
 		MvcResult mvcResult = mockMvc.perform(
@@ -147,15 +147,16 @@ public class SecurityTests {
 		RefreshTokenRequest request = new RefreshTokenRequest("abc", "1234");
 		String requestBody = objectMapper.writeValueAsString(request);
 		mockMvc.perform(post(REFRESH_TOKEN_ENDPOINT)
-			.contentType("application/json")
-			.content(requestBody))
+				.contentType("application/json")
+				.content(requestBody))
 			.andDo(print())
 			.andExpect(status().isBadRequest());
 	}
 
 	@Test
 	public void testRefreshTokenFail() throws Exception {
-		RefreshTokenRequest request = new RefreshTokenRequest("abc", "saiojaiwojifa89we8f9aewfsaiojaiwojifa89we8f9aewf");
+		RefreshTokenRequest request = new RefreshTokenRequest("abc",
+			"saiojaiwojifa89we8f9aewfsaiojaiwojifa89we8f9aewf");
 		String requestBody = objectMapper.writeValueAsString(request);
 		mockMvc.perform(post(REFRESH_TOKEN_ENDPOINT)
 				.contentType("application/json")
@@ -166,7 +167,8 @@ public class SecurityTests {
 
 	@Test
 	public void testRefreshTokenSuccess() throws Exception {
-		RefreshTokenRequest request = new RefreshTokenRequest("abc", "cd4d6b8b-c5bd-4bdd-93b6-051807754fcf");
+		RefreshTokenRequest request = new RefreshTokenRequest("abc",
+			"cd4d6b8b-c5bd-4bdd-93b6-051807754fcf");
 		String requestBody = objectMapper.writeValueAsString(request);
 		mockMvc.perform(post(REFRESH_TOKEN_ENDPOINT)
 				.contentType("application/json")

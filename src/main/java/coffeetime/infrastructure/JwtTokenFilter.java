@@ -1,6 +1,5 @@
 package coffeetime.infrastructure;
 
-
 import coffeetime.controller.ServerAlertController;
 import coffeetime.domain.Role;
 import coffeetime.domain.User;
@@ -11,9 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,99 +23,98 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 @Component
+@Slf4j
 public class JwtTokenFilter extends OncePerRequestFilter {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(
-		JwtTokenFilter.class);
+	private static final String TOKEN_ENDPOINT = "/token";
+	private static final String BEARER_PREFIX = "Bearer ";
+
 	private final JwtUtility jwtUtility;
 	private final HandlerExceptionResolver handlerExceptionResolver;
-	private ServerAlertController serverAlertController;
-
+	private final ServerAlertController serverAlertController;
 
 
 	public JwtTokenFilter(JwtUtility jwtUtility,
-		@Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver) {
+		@Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver,
+		ServerAlertController serverAlertController) {
 		this.jwtUtility = jwtUtility;
 		this.handlerExceptionResolver = handlerExceptionResolver;
+		this.serverAlertController = serverAlertController;
 	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request,
 		HttpServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
-
-		Authentication authentication = SecurityContextHolder.getContext()
-			.getAuthentication();
-		LOGGER.debug("Initial authentication state: {}",
-			authentication != null ? "Present" : "Null");
-
 		String token = extractToken(request);
-		if (token == null) {
-			LOGGER.debug("No Authorization Bearer token found");
+		if (isTokenEndpoint(request)) {
 			filterChain.doFilter(request, response);
 			return;
 		}
+		if (token == null) {
+			log.debug("No Authorization Bearer token found");
+			filterChain.doFilter(request, response);
+			return;
+		}
+		processToken(token, request, response, filterChain);
+	}
 
-		LOGGER.debug("Processing token: {}",
-			token.substring(0, Math.min(10, token.length())) + "...");
+	private boolean isTokenEndpoint(HttpServletRequest request) {
+		return request.getRequestURI().endsWith(TOKEN_ENDPOINT);
+	}
 
+	private void processToken(String token, HttpServletRequest request,
+		HttpServletResponse response, FilterChain filterChain)
+		throws ServletException, IOException {
 		try {
 			Claims claims = jwtUtility.validateAccessToken(token);
-			LOGGER.debug("JWT Claims: subject={}, role={}",
-				claims.get(Claims.SUBJECT), claims.get("role"));
-
-			UserDetails userDetails = createUserDetails(claims);
-			LOGGER.debug("Created UserDetails: username={}, authorities={}",
-				userDetails.getUsername(),
-				userDetails.getAuthorities().stream().map(Object::toString)
-					.collect(Collectors.joining(", ")));
-
+			UserDetails userDetails = createUserDetailsFromClaims(claims);
 			setAuthenticationContext(userDetails, request);
-			LOGGER.debug(
-				"Authentication context set. Proceeding with filter chain.");
 			filterChain.doFilter(request, response);
-
 		} catch (JwtValidationException e) {
-			LOGGER.error(e.getMessage(), e);
-			handlerExceptionResolver.resolveException(request, response, null,
-				e);
+			serverAlertController.sendServerAlertMessage(request, e);
+			log.error("Token validation failed: {}", e.getMessage());
+			handlerExceptionResolver.resolveException(request, response, null, e);
 		}
 	}
 
-	private void setAuthenticationContext(UserDetails userDetails,
-		HttpServletRequest request) {
-		var authenticationToken = new UsernamePasswordAuthenticationToken(
-			userDetails, null, userDetails.getAuthorities());
-		authenticationToken.setDetails(
-			new WebAuthenticationDetailsSource().buildDetails(request));
-		SecurityContextHolder.getContext()
-			.setAuthentication(authenticationToken);
-		LOGGER.debug("Authentication context set for user: {}",
-			userDetails.getUsername());
+	private UserDetails createUserDetailsFromClaims(Claims claims) {
+		String[] subjectParts = extractSubjectParts(claims);
+		return new CustomUserDetails(
+			new User(
+				Long.valueOf(subjectParts[0]),
+				subjectParts[1].trim(),
+				Role.valueOf((String) claims.get("role"))
+			)
+		);
 	}
 
-	private UserDetails createUserDetails(Claims claims) {
-		String subject = (String) claims.get(Claims.SUBJECT);
-		LOGGER.debug("Processing JWT subject: {}", subject);
+	private String[] extractSubjectParts(Claims claims) {
+		String subject = claims.getSubject();
+		log.debug("Processing JWT subject: {}", subject);
+		return subject.split(",");
+	}
 
-		String[] array = subject.split(",");
-		Long id = Long.valueOf(array[0]);
-		String username = array[1].trim();
-		Role role = Role.valueOf((String) claims.get("role"));
+	private void setAuthenticationContext(UserDetails userDetails, HttpServletRequest request) {
+		var authentication = createAuthentication(userDetails, request);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		log.debug("Authentication context set for user: {}", userDetails.getUsername());
+	}
 
-		User user = new User(id, username, role);
-		return new CustomUserDetails(user);
+	private Authentication createAuthentication(UserDetails userDetails,
+		HttpServletRequest request) {
+		var authentication = new UsernamePasswordAuthenticationToken(
+			userDetails, null, userDetails.getAuthorities());
+		authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+		return authentication;
 	}
 
 	private String extractToken(HttpServletRequest request) {
 		String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-
-		if (header != null && header.startsWith("Bearer ")) {
-			return header.split(" ")[1];
+		if (header != null && header.startsWith(BEARER_PREFIX)) {
+			return header.substring(BEARER_PREFIX.length());
 		}
-
-		LOGGER.debug("Bearer token extracted failed");
+		log.debug("Bearer token extraction failed");
 		return null;
 	}
 }
-

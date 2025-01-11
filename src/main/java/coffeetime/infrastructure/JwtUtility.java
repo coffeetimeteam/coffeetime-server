@@ -32,27 +32,39 @@ public class JwtUtility {
 	@Value("${token.jwt.access-token-expiration}")
 	private Integer accessTokenExpiration;
 
+	@Value("${token.jwt.refresh-token-expiration}")
+	private Integer refreshTokenExpiration;
+
+
 	public String generateAccessToken(User user) {
-		if (user == null || user.getId() == null || user.getUsername() == null) {
+		if (user.getId() == null || user.getUsername() == null) {
 			throw new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_USER);
 		}
-
-		long expirationTimeInMillis = accessTokenExpiration * 6000 + System.currentTimeMillis();
 		String subject = String.format("%s, %s", user.getId(), user.getUsername());
+		return generateToken(subject, accessTokenExpiration, user.getRole().name());
+	}
+
+	public String generateRefreshToken() {
+		return generateToken("", refreshTokenExpiration, "");
+	}
+
+	private String generateToken(String subject, Integer expirationMinutes, String role) {
+		long expirationTimeInMillis = expirationMinutes * 6000 + System.currentTimeMillis();
 		return Jwts.builder()
 			.subject(subject)
 			.issuer(tokenIssuer)
 			.issuedAt(new Date())
 			.expiration(new Date(expirationTimeInMillis))
-			.claim("role", user.getRole().name())
-			.signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)), Jwts.SIG.HS512)
+			.claim("role", role)
+			.signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)),
+				Jwts.SIG.HS512)
 			.compact();
 	}
 
 	public Claims validateAccessToken(String token) throws JwtValidationException {
 		try {
-			SecretKeySpec keySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), SECRET_KEY_ALGORITHM);
-
+			SecretKeySpec keySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8),
+				SECRET_KEY_ALGORITHM);
 			return Jwts.parser()
 				.verifyWith(keySpec)
 				.build()

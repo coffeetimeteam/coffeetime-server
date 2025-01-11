@@ -1,7 +1,7 @@
 ## 📄 Summary
 
-- [ ]
+- tracks issue #issue_number
 
 ## 🚧 More
 
-close #이슈번호
+close #issue_number
