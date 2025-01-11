@@ -2,7 +2,7 @@ package coffeetime.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import coffeetime.dto.APIResponse;
+import coffeetime.dto.GlobalResponse;
 import coffeetime.dto.UserCreateRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +26,9 @@ public class UserServiceTests {
 		);
 
 		// when
-		APIResponse response = userService.createUser(request);
+		GlobalResponse globalResponse = userService.createUser(request);
 
 		// then
-		assertThat(response.getStatus()).isEqualTo(200);
+		assertThat(globalResponse.getStatus()).isEqualTo(200);
 	}
 }
