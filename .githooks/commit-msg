@@ -1,0 +1,17 @@
+#!/bin/sh
+
+COMMIT_MESSAGE_FILE_PATH=$1
+MESSAGE=$(cat "$COMMIT_MESSAGE_FILE_PATH")
+
+
+if [[ $(head -1 "$COMMIT_MESSAGE_FILE_PATH") == '' ]]; then
+  exit 0
+fi
+
+NUMBERS=$(git branch | grep '\*' | sed 's/* //' | sed -E 's/.*-([0-9]+)/\1/')
+
+CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || git symbolic-ref --short HEAD)
+
+if [[ "$CURRENT_BRANCH" != "$NUMBERS" ]] && [ "$COMMIT_SOURCE" != "merge" ] && [[ "$MESSAGE" != *"(#$NUMBERS)"* ]]; then
+  printf "%s[#%s]" "$MESSAGE" "$NUMBERS" > "$COMMIT_MESSAGE_FILE_PATH"
+fi
