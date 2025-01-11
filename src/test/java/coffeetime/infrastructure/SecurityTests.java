@@ -1,0 +1,177 @@
+package coffeetime.infrastructure;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import coffeetime.dto.AuthRequest;
+import coffeetime.dto.AuthResponse;
+import coffeetime.dto.RefreshTokenRequest;
+import coffeetime.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+public class SecurityTests {
+
+	@Autowired
+	private MockMvc mockMvc;
+
+	@Autowired
+	private ObjectMapper objectMapper;
+
+	@Autowired
+	private UserService userService;
+
+	private PasswordEncoder passwordEncoder;
+
+	private static final String GET_ACCESS_TOKEN_ENDPOINT = "/api/v1/auth/login";
+	private static final String GET_MY_ENDPOINT = "/api/v1/my";
+	private static final String REFRESH_TOKEN_ENDPOINT = "/api/v1/auth/token";
+
+	// given
+	final String username = "security@email.com";
+	final String password = "password";
+
+//	@BeforeEach
+//	public void setup() {
+//		UserCreateRequest request = new UserCreateRequest(
+//			username,
+//			password,
+//			password
+//		);
+//		userService.createUser(request);
+//	}
+
+	@Test
+	public void getBaseURIShouldReturn401() throws Exception {
+		mockMvc.perform(get("/"))
+			.andDo(print())
+			.andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	public void testGetAccessTokenBadRequest() throws Exception {
+		// given
+		final String wrongPassword = "";
+
+		// when
+		AuthRequest authRequest = new AuthRequest(username, wrongPassword);
+		String requestBody = objectMapper.writeValueAsString(authRequest);
+
+		// then
+		mockMvc.perform(
+				post(GET_ACCESS_TOKEN_ENDPOINT)
+					.contentType("application/json")
+					.content(requestBody))
+			.andDo(print())
+			.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	public void testGetAccessTokenFail() throws Exception {
+		final String wrongPassword = "wrongPassword";
+		AuthRequest request = new AuthRequest(username, wrongPassword);
+
+		String requestBody = objectMapper.writeValueAsString(request);
+
+		mockMvc.perform(
+				post(GET_ACCESS_TOKEN_ENDPOINT)
+					.contentType("application/json")
+					.content(requestBody))
+			.andDo(print())
+			.andExpect(status().isUnauthorized());
+
+	}
+
+	@Test
+	public void testGetAccessTokenSuccess() throws Exception {
+		AuthRequest request = new AuthRequest(username, password);
+
+		String requestBody = objectMapper.writeValueAsString(request);
+
+		mockMvc.perform(
+				post(GET_ACCESS_TOKEN_ENDPOINT)
+					.contentType("application/json")
+					.content(requestBody))
+			.andDo(print())
+			.andExpect(status().isOk());
+//			.andExpect(jsonPath("$.accessToken").isNotEmpty())
+//			.andExpect(jsonPath("$.refreshToken").isNotEmpty());
+	}
+
+	@Test
+	public void testGetListFail() throws Exception {
+		mockMvc.perform(get(GET_MY_ENDPOINT).header("Authorization",
+				"Bearer something invalid"))
+			.andDo(print())
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.errors").isNotEmpty());
+	}
+
+	@Test
+	public void testListSuccess() throws Exception {
+		AuthRequest request = new AuthRequest(username, password);
+		String requestBody = objectMapper.writeValueAsString(request);
+
+		MvcResult mvcResult = mockMvc.perform(
+				post(GET_ACCESS_TOKEN_ENDPOINT)
+					.contentType("application/json")
+					.content(requestBody))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andReturn();
+
+		String responseBody = mvcResult.getResponse().getContentAsString();
+		AuthResponse authResponse = objectMapper.readValue(responseBody, AuthResponse.class);
+		String bearerToken = "Bearer " + authResponse.getAccessToken();
+
+		mockMvc.perform(get(GET_MY_ENDPOINT).header("Authorization", bearerToken))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.username").isString())
+			.andExpect(jsonPath("$.nickname").isString());
+	}
+
+	@Test
+	public void testRefreshTokenBadRequest() throws Exception {
+		RefreshTokenRequest request = new RefreshTokenRequest("abc", "1234");
+		String requestBody = objectMapper.writeValueAsString(request);
+		mockMvc.perform(post(REFRESH_TOKEN_ENDPOINT)
+			.contentType("application/json")
+			.content(requestBody))
+			.andDo(print())
+			.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	public void testRefreshTokenFail() throws Exception {
+		RefreshTokenRequest request = new RefreshTokenRequest("abc", "saiojaiwojifa89we8f9aewfsaiojaiwojifa89we8f9aewf");
+		String requestBody = objectMapper.writeValueAsString(request);
+		mockMvc.perform(post(REFRESH_TOKEN_ENDPOINT)
+				.contentType("application/json")
+				.content(requestBody))
+			.andDo(print())
+			.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	public void testRefreshTokenSuccess() throws Exception {
+		RefreshTokenRequest request = new RefreshTokenRequest("abc", "cd4d6b8b-c5bd-4bdd-93b6-051807754fcf");
+		String requestBody = objectMapper.writeValueAsString(request);
+		mockMvc.perform(post(REFRESH_TOKEN_ENDPOINT)
+				.contentType("application/json")
+				.content(requestBody))
+			.andDo(print())
+			.andExpect(status().isOk());
+	}
+}
