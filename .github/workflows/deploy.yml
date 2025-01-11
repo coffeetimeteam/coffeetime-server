@@ -36,8 +36,8 @@ jobs:
             sudo touch .env
             echo "${{ secrets.ENV_VARS }}" | sudo tee .env > /dev/null
             
-            sudo touch docker-compose.yaml
-            echo "${{ vars.DOCKER_COMPOSE }}" | sudo tee docker-compose.yml > /dev/null
+            sudo touch docker-compose.yml
+            echo "${{ secrets.DOCKER_COMPOSE }}" | sudo tee docker-compose.yml > /dev/null
             
             sudo chmod 666 /var/run/docker.sock
             sudo docker rm -f $(docker ps -qa)
