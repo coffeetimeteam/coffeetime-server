@@ -2,18 +2,15 @@ package coffeetime.service;
 
 import coffeetime.domain.RefreshToken;
 import coffeetime.domain.User;
-import coffeetime.dto.AuthResponse;
-import coffeetime.dto.RefreshTokenRequest;
+import coffeetime.domain.UserTokens;
 import coffeetime.exception.CoffeeTimeException;
 import coffeetime.exception.EntryPayloadCode;
 import coffeetime.infrastructure.JwtUtility;
 import coffeetime.repository.RefreshTokenRepository;
+import coffeetime.repository.UserRepository;
 import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,47 +19,43 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class TokenService {
 
+	private final UserRepository userRepository;
 	@Value("${token.jwt.refresh-token-expiration}")
 	private Integer refreshTokenExpiration;
 	private final RefreshTokenRepository refreshTokenRepository;
 	private final JwtUtility jwtUtility;
-	private final PasswordEncoder passwordEncoder;
 
-	public AuthResponse generateTokens(User user) {
+	public UserTokens generateTokens(User user) {
 		final String accessToken = jwtUtility.generateAccessToken(user);
-		final String randomUUID = UUID.randomUUID().toString();
+		final String refreshToken = jwtUtility.generateRefreshToken();
+		final UserTokens userTokens = new UserTokens(accessToken, refreshToken);
 		final long refreshTokenExpirationMills =
 			System.currentTimeMillis() + refreshTokenExpiration * 60000L;
-
-		RefreshToken refreshToken = new RefreshToken(
+		final RefreshToken newRefreshToken = new RefreshToken(
 			user,
-			passwordEncoder.encode(randomUUID),
+			userTokens.refreshToken(),
 			new Date(refreshTokenExpirationMills));
-		refreshTokenRepository.save(refreshToken);
-
-		return AuthResponse.of(accessToken, randomUUID);
+		refreshTokenRepository.save(newRefreshToken);
+		return userTokens;
 	}
 
-	public AuthResponse refreshToken(RefreshTokenRequest request) throws CoffeeTimeException {
-		String rawRefreshToken = request.refreshToken();
-		List<RefreshToken> refreshTokenList = refreshTokenRepository.findByUsername(request.username());
-		RefreshToken findRefreshToken = null;
-		for (RefreshToken token : refreshTokenList) {
-			if (passwordEncoder.matches(rawRefreshToken, token.getToken())) {
-				findRefreshToken = token;
-			}
+	public UserTokens renewalTokens(String bearerToken) {
+		if (bearerToken == null) {
+			throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
 		}
-		if (findRefreshToken == null) {
-			throw new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_TOKEN);
-		}
-		Date currentDate = new Date();
+		final String token = bearerToken.replace("Bearer ", "");
+		final Date currentDate = new Date();
+		final RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
+			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.FAIL_RENEWAL_TOKE));
+		validateExpiration(refreshToken, currentDate);
+		refreshTokenRepository.delete(refreshToken);
+		return generateTokens(refreshToken.getUser());
+	}
 
-		if (findRefreshToken.getExpiredAt().before(currentDate)) {
+
+	private void validateExpiration(RefreshToken token, Date currentDate) {
+		if (token.getExpiredAt().before(currentDate)) {
 			throw new CoffeeTimeException(EntryPayloadCode.EXPIRED_TOKEN);
 		}
-
-		AuthResponse response = generateTokens(findRefreshToken.getUser());
-		refreshTokenRepository.delete(findRefreshToken);
-		return response;
 	}
 }
