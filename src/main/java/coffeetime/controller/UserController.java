@@ -8,6 +8,7 @@ import coffeetime.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,6 +31,7 @@ public class UserController {
 	}
 
 	@GetMapping("/my")
+	@PreAuthorize("isAuthenticated()")
 	public ResponseEntity<UserResponse> getUserInfo() {
 		final User user = userService.getCurrentUser();
 		final UserResponse response = new UserResponse(user.getId(), user.getUsername(),
