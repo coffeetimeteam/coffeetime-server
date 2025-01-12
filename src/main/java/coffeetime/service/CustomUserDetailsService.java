@@ -5,6 +5,7 @@ import coffeetime.infrastructure.CustomUserDetails;
 import coffeetime.repository.UserRepository;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,9 +21,15 @@ public class CustomUserDetailsService implements UserDetailsService {
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		Optional<User> findByUsername = userRepository.findByUsername(username);
 
-		if(!findByUsername.isPresent()) {
+		if (!findByUsername.isPresent()) {
 			throw new UsernameNotFoundException("No user found with username");
 		}
 		return new CustomUserDetails(findByUsername.get());
+	}
+
+	public CustomUserDetails getCurrentUserDetails() {
+		return (CustomUserDetails) SecurityContextHolder.getContext()
+			.getAuthentication()
+			.getPrincipal();
 	}
 }
