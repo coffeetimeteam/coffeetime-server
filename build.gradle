@@ -62,22 +62,3 @@ dependencyManagement {
 tasks.named('test') {
     useJUnitPlatform()
 }
-
-
-task initGitHooks {
-    doLast {
-        exec {
-            commandLine 'git', 'config', 'core.hooksPath', '.githooks'
-        }
-        exec {
-            commandLine 'git', 'config', 'core.fileMode', 'true'
-        }
-        exec {
-            commandLine 'git', 'update-index', '--chmod=+x', '.githooks/commit-msg'
-        }
-    }
-}
-
-tasks.named('processResources').configure {
-    dependsOn 'initGitHooks'
-}
