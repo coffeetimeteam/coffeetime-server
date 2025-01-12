@@ -25,7 +25,7 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final DefaultNickname defaultNickname;
-	private final AuthService authService;
+	private final CustomUserDetailsService customUserDetailsService;
 
 	public GlobalResponse createUser(final UserCreateRequest request) {
 		if (userRepository.existsByUsername(request.getUsername())) {
@@ -47,7 +47,7 @@ public class UserService {
 	}
 
 	public User getCurrentUser() {
-		final CustomUserDetails customUserDetails = authService.getCurrentUserDetails();
+		final CustomUserDetails customUserDetails = customUserDetailsService.getCurrentUserDetails();
 		final String username = customUserDetails.getUsername();
 		return userRepository.findByUsername(username)
 			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_USER));
