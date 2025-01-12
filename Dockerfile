@@ -1,29 +1,50 @@
-# Use OpenJDK 17 slim image as base for the build stage
-FROM --platform=linux/amd64 openjdk:17-jdk-slim AS build
+# build stage
+FROM openjdk:17-jdk-slim AS build
 
-# Set the working directory in the container
+# install
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    unzip \
+  && rm -rf /var/lib/apt/lists/*
+
+# gradle
+ARG GRADLE_VERSION=7.6
+RUN wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip \
+    && unzip gradle-${GRADLE_VERSION}-bin.zip -d /opt/ \
+    && ln -s /opt/gradle-${GRADLE_VERSION}/bin/gradle /usr/bin/gradle \
+    && rm gradle-${GRADLE_VERSION}-bin.zip
+
+# working dir
 WORKDIR /app
 
-# Define an argument for the JAR file location
-ARG JAR_FILE=build/libs/*.jar
+# copy
+COPY gradlew gradlew.bat /app/
+COPY gradle /app/gradle
+COPY build.gradle settings.gradle /app/
 
-# Copy the JAR file from the build context to the container
-COPY ${JAR_FILE} app.jar
+# cache gradle
+RUN ./gradlew dependencies --no-daemon
 
-# Create a new stage for the runtime environment
-FROM --platform=linux/amd64 openjdk:17-jdk-slim
+# copy
+COPY src /app/src
 
-# Set the working directory in the container
+# build
+RUN ./gradlew clean build -x test --no-daemon
+
+# runtime stage
+FROM openjdk:17-jdk-slim
+
+# working dir
 WORKDIR /app
 
-# Copy the application configuration file to the container
+# copy
 COPY src/main/resources/application*.yml /app/
 
-# Copy the JAR file from the build stage to the runtime stage
-COPY --from=build /app/app.jar app.jar
+# copy
+COPY --from=build /app/build/libs/*.jar app.jar
 
-# Expose port 8080 for the application
+# port
 EXPOSE 8080
 
-# Define the entrypoint for the container
+# entrypoint
 ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-Dotel.resource.attributes=service.name=auth-server", "-jar", "app.jar"]
