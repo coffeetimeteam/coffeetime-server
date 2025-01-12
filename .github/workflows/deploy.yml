@@ -12,6 +12,15 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
 
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build with Gradle
+        run: ./gradlew bootJar -x test
+
       - name: set up docker buildx
         uses: docker/setup-buildx-action@v3
 
@@ -29,7 +38,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ubuntu/
-            
             sudo rm -f .env
             sudo rm -f docker-compose.yml
             
@@ -41,6 +49,8 @@ jobs:
             
             sudo chmod 666 /var/run/docker.sock
             sudo docker rm -f $(docker ps -qa)
+
+            echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u "changedan" --password-stdin
             sudo docker pull changedan/coffeetime
             docker-compose -f docker-compose.yml --env-file ./.env up -d
             docker image prune -f
