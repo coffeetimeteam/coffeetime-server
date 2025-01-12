@@ -33,10 +33,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Push Docker Image
-        run: |
-          docker push changedan/coffeetime:latest
-
       - name: deploy to ec2
         uses: appleboy/ssh-action@master
         with:
