@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -32,7 +33,7 @@ public class AuthController {
 			.body(new GlobalResponse(EntryPayloadCode.SUCCESS_REQUEST));
 	}
 
-	@PostMapping("/token")
+	@GetMapping("/token")
 	public ResponseEntity<GlobalResponse> extendLogin(
 		@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
 		final UserTokens userTokens = tokenService.renewalTokens(bearerToken);
