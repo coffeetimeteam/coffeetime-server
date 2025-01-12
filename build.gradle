@@ -78,10 +78,6 @@ task initGitHooks {
     }
 }
 
-tasks.named('build') {
-    dependsOn("installLocalGitHook")
-}
-
 tasks.named('processResources').configure {
     dependsOn 'initGitHooks'
 }

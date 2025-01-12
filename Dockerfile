@@ -1,32 +1,26 @@
-# Base image for the build stage (Gradle)
+# Use OpenJDK 17 slim image as base for the build stage
 FROM --platform=linux/amd64 openjdk:17-jdk-slim AS build
 
-# Set the working directory in the container for the build stage
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy the Gradle wrapper and build scripts
-COPY gradle /app/gradle
-COPY gradlew /app/
-COPY build.gradle /app/
-COPY settings.gradle /app/
+# Define an argument for the JAR file location
+ARG JAR_FILE=build/libs/*.jar
 
-# Copy the source code into the container
-COPY src /app/src/main
-
-# Run Gradle build to generate the JAR file
-RUN ./gradlew build
+# Copy the JAR file from the build context to the container
+COPY ${JAR_FILE} app.jar
 
 # Create a new stage for the runtime environment
 FROM --platform=linux/amd64 openjdk:17-jdk-slim
 
-# Set the working directory in the container for the runtime stage
+# Set the working directory in the container
 WORKDIR /app
 
 # Copy the application configuration file to the container
-COPY src/main/resources/application.yml /app/application.yml
+COPY src/main/resources/application*.yml /app/
 
 # Copy the JAR file from the build stage to the runtime stage
-COPY --from=build /app/build/libs/*.jar app.jar
+COPY --from=build /app/app.jar app.jar
 
 # Expose port 8080 for the application
 EXPOSE 8080
