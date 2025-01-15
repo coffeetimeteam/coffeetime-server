@@ -31,7 +31,7 @@ public class AuthController {
 	}
 
 	@GetMapping("/token")
-	@PreAuthorize("isAuthenticated()")
+	@PreAuthorize("@jwtTokenFilter.hasValidRefreshToken(#bearerToken)")
 	public ResponseEntity<TokensResponse> extendLogin(
 		@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
 		final TokensResponse userTokens = tokenService.renewalTokens(bearerToken);

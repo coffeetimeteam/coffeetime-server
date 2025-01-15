@@ -60,18 +60,12 @@ public class SecurityConfig {
 		throws Exception {
 		http.authorizeHttpRequests(
 				auth -> auth
-					.requestMatchers("/api/health-check")
-					.permitAll()
-					.requestMatchers("/api/v1/auth/**")
-					.permitAll()
-					.requestMatchers("api/v1/my")
-					.hasAnyAuthority(Role.GENERAL_USER.name(),
+					.requestMatchers("/api/v1/auth/**").permitAll()
+					.requestMatchers("/api/health-check").permitAll()
+					.requestMatchers("api/v1/my").authenticated()
+					.requestMatchers("api/v1/my/nickname").hasAnyAuthority(Role.GENERAL_USER.name(),
 						Role.SPECIAL_USER.name())
-					.requestMatchers("api/v1/my/nickname")
-					.hasAnyAuthority(Role.GENERAL_USER.name(),
-						Role.SPECIAL_USER.name())
-					.anyRequest()
-					.authenticated())
+					.anyRequest().authenticated())
 			.csrf(csrf -> csrf.disable())
 			.exceptionHandling(exception -> exception.authenticationEntryPoint(
 				(request, response, authException) ->
