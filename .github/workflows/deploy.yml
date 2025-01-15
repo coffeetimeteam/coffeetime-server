@@ -3,7 +3,7 @@ name: Docker Build and Deploy
 on:
   workflow_dispatch:
   push:
-    branches: [ "feat-23" ]
+    branches: [ "develop" ]
     paths:
       - "./**"
       - ".github/workflows/deploy.yml"
