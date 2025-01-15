@@ -1,14 +1,10 @@
 name: Docker Build and Deploy
 
-env:
-  PROFILE: prod
-  DOCKER_HUB_REPOSITORY: changedan/coffeetime
-
 on:
   workflow_dispatch:
   push:
     branches:
-      - develop
+      - feat-23
     paths:
       - "./**"
       - ".github/workflows/deploy.yml"
@@ -27,16 +23,6 @@ jobs:
         with:
           java-version: 17
           distribution: 'temurin'
-
-      - name: gradle caching
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
 
       - name: assign grant gradlew
         run: chmod +x ./gradlew
@@ -61,6 +47,7 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/coffeetime:latest
+          build-args: --no-cache
 
   docker-pull-and-run:
     runs-on: [ self-hosted, deploy ]
