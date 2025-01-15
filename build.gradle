@@ -17,6 +17,13 @@ java {
     }
 }
 
+jar {
+    archiveBaseName.set('coffeetime')
+    archiveVersion.set('')
+    archiveClassifier.set('')
+}
+
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
