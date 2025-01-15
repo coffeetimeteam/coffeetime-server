@@ -60,6 +60,8 @@ public class SecurityConfig {
 		throws Exception {
 		http.authorizeHttpRequests(
 				auth -> auth
+					.requestMatchers("/api/health-check")
+					.permitAll()
 					.requestMatchers("/api/v1/auth/**")
 					.permitAll()
 					.requestMatchers("api/v1/my")
@@ -73,7 +75,7 @@ public class SecurityConfig {
 			.csrf(csrf -> csrf.disable())
 			.exceptionHandling(exception -> exception.authenticationEntryPoint(
 				(request, response, authException) ->
-						response.sendError(
+					response.sendError(
 						HttpServletResponse.SC_UNAUTHORIZED,
 						authException.getMessage())
 
@@ -86,7 +88,8 @@ public class SecurityConfig {
 						HttpServletRequest request) {
 						CorsConfiguration config = new CorsConfiguration();
 						config.setAllowedOriginPatterns(
-							Arrays.asList("http://localhost:3030", "https://coffeetime.parkgadan.com")
+							Arrays.asList("http://localhost:3030",
+								"https://coffeetime.parkgadan.com")
 						);
 						config.setAllowedMethods(
 							Collections.singletonList("*"));
