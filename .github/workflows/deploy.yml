@@ -1,14 +1,9 @@
 name: Docker Build and Deploy
 
-env:
-  PROFILE: prod
-  DOCKER_HUB_REPOSITORY: changedan/coffeetime
-
 on:
   workflow_dispatch:
   push:
-    branches:
-      - develop
+    branches: [ "develop" ]
     paths:
       - "./**"
       - ".github/workflows/deploy.yml"
@@ -61,6 +56,7 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/coffeetime:latest
+          build-args: --no-cache
 
   docker-pull-and-run:
     runs-on: [ self-hosted, deploy ]

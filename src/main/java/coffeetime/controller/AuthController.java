@@ -27,15 +27,15 @@ public class AuthController {
 	@PostMapping("/login")
 	public ResponseEntity<TokensResponse> login(@RequestBody @Valid LoginRequest request) {
 		final TokensResponse userTokens = authService.loginTokens(request);
-		return ResponseEntity.ok(userTokens);
+		return ResponseEntity.ok().body(userTokens);
 	}
 
 	@GetMapping("/token")
-	@PreAuthorize("isAuthenticated()")
+	@PreAuthorize("@jwtTokenFilter.hasValidRefreshToken(#bearerToken)")
 	public ResponseEntity<TokensResponse> extendLogin(
 		@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
 		final TokensResponse userTokens = tokenService.renewalTokens(bearerToken);
-		return ResponseEntity.ok(userTokens);
+		return ResponseEntity.ok().body(userTokens);
 	}
 }
 
