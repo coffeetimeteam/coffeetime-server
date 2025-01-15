@@ -42,7 +42,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: bootJar with gradle
-        run: ./gradlew bootJar -x test
+        run: ./gradlew clean bootJar -x test
 
       - name: login to docker hub
         uses: docker/login-action@v2
