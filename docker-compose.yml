@@ -1,13 +1,20 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
     image: changedan/coffeetime:latest
-    container_name: coffeetime_container
     ports:
       - "8080:8080"
-    environment:
-      SPRING_PROFILES_ACTIVE: "prod"
+    build:
+      context: .
+      dockerfile: ./Dockerfile
     env_file:
       - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_HOST=${DB_HOST}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DISCORD_WEBHOOK=${DISCORD_WEBHOOK}
+      - ISSUER=${ISSUER}
+      - SECRET=${SECRET}
+      - ACCESS_TOKEN_TIME=${ACCESS_TOKEN_TIME}
+      - REFRESH_TOKEN_TIME=${REFRESH_TOKEN_TIME}
