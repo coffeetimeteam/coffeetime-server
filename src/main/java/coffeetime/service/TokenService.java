@@ -2,7 +2,7 @@ package coffeetime.service;
 
 import coffeetime.domain.RefreshToken;
 import coffeetime.domain.User;
-import coffeetime.domain.UserTokens;
+import coffeetime.dto.TokensResponse;
 import coffeetime.exception.CoffeeTimeException;
 import coffeetime.exception.EntryPayloadCode;
 import coffeetime.infrastructure.JwtUtility;
@@ -25,21 +25,20 @@ public class TokenService {
 	private final RefreshTokenRepository refreshTokenRepository;
 	private final JwtUtility jwtUtility;
 
-	public UserTokens generateTokens(User user) {
+	public TokensResponse generateTokens(User user) {
 		final String accessToken = jwtUtility.generateAccessToken(user);
 		final String refreshToken = jwtUtility.generateRefreshToken();
-		final UserTokens userTokens = new UserTokens(accessToken, refreshToken);
 		final long refreshTokenExpirationMills =
 			System.currentTimeMillis() + refreshTokenExpiration * 60000L;
 		final RefreshToken newRefreshToken = new RefreshToken(
 			user,
-			userTokens.refreshToken(),
+			refreshToken,
 			new Date(refreshTokenExpirationMills));
 		refreshTokenRepository.save(newRefreshToken);
-		return userTokens;
+		return new TokensResponse(accessToken, refreshToken);
 	}
 
-	public UserTokens renewalTokens(String bearerToken) {
+	public TokensResponse renewalTokens(String bearerToken) {
 		if (bearerToken == null) {
 			throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
 		}
