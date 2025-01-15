@@ -5,7 +5,7 @@ import coffeetime.exception.EntryPayloadCode;
 import java.util.Arrays;
 
 public enum Role {
-
+	
 	GENERAL_USER,
 	SPECIAL_USER;
 

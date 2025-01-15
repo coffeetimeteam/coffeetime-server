@@ -1,15 +1,14 @@
 package coffeetime.controller;
 
-import coffeetime.domain.UserTokens;
-import coffeetime.dto.GlobalResponse;
 import coffeetime.dto.LoginRequest;
-import coffeetime.exception.EntryPayloadCode;
+import coffeetime.dto.TokensResponse;
 import coffeetime.service.AuthService;
 import coffeetime.service.TokenService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,20 +25,17 @@ public class AuthController {
 	private final AuthService authService;
 
 	@PostMapping("/login")
-	public ResponseEntity<GlobalResponse> login(@RequestBody @Valid LoginRequest request) {
-		final UserTokens userTokens = authService.loginTokens(request);
-		final HttpHeaders headers = authService.tokenHeaders(userTokens);
-		return ResponseEntity.ok().headers(headers)
-			.body(new GlobalResponse(EntryPayloadCode.SUCCESS_REQUEST));
+	public ResponseEntity<TokensResponse> login(@RequestBody @Valid LoginRequest request) {
+		final TokensResponse userTokens = authService.loginTokens(request);
+		return ResponseEntity.ok(userTokens);
 	}
 
 	@GetMapping("/token")
-	public ResponseEntity<GlobalResponse> extendLogin(
+	@PreAuthorize("isAuthenticated()")
+	public ResponseEntity<TokensResponse> extendLogin(
 		@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
-		final UserTokens userTokens = tokenService.renewalTokens(bearerToken);
-		final HttpHeaders headers = authService.tokenHeaders(userTokens);
-		return ResponseEntity.ok().headers(headers)
-			.body(new GlobalResponse(EntryPayloadCode.SUCCESS_REQUEST));
+		final TokensResponse userTokens = tokenService.renewalTokens(bearerToken);
+		return ResponseEntity.ok(userTokens);
 	}
 }
 
