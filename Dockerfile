@@ -1,50 +1,7 @@
-# build stage
-FROM openjdk:17-jdk-slim AS build
+FROM openjdk:17-jdk
 
-# install
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget \
-    unzip \
-  && rm -rf /var/lib/apt/lists/*
+COPY ./build/libs/coffeetime-server-0.0.1-SNAPSHOT.jar /app/coffeetime.jar
 
-# gradle
-ARG GRADLE_VERSION=7.6
-RUN wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip \
-    && unzip gradle-${GRADLE_VERSION}-bin.zip -d /opt/ \
-    && ln -s /opt/gradle-${GRADLE_VERSION}/bin/gradle /usr/bin/gradle \
-    && rm gradle-${GRADLE_VERSION}-bin.zip
-
-# working dir
 WORKDIR /app
 
-# copy
-COPY gradlew gradlew.bat /app/
-COPY gradle /app/gradle
-COPY build.gradle settings.gradle /app/
-
-# cache gradle
-RUN ./gradlew dependencies --no-daemon
-
-# copy
-COPY src /app/src
-
-# build
-RUN ./gradlew clean build -x test --no-daemon
-
-# runtime stage
-FROM openjdk:17-jdk-slim
-
-# working dir
-WORKDIR /app
-
-# copy
-COPY src/main/resources/application*.yml /app/
-
-# copy
-COPY --from=build /app/build/libs/*.jar app.jar
-
-# port
-EXPOSE 8080
-
-# entrypoint
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-Dotel.resource.attributes=service.name=auth-server", "-jar", "app.jar"]
+CMD ["java", "-jar", "coffeetime.jar"]
