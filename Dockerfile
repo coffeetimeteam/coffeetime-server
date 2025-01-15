@@ -1,7 +1,7 @@
 FROM openjdk:17-jdk
 
-ARG JAR_FILE=build/libs/coffeetime-server-0.0.1-SNAPSHOT.jar
+COPY ./build/libs/coffeetime-server-0.0.1-SNAPSHOT.jar /app/coffeetime.jar
 
-COPY ${JAR_FILE} coffeetime.jar
+WORKDIR /app
 
-CMD ["java", "-jar", "-Dspring.profiles.active=prod", "-Duser.timezone=Asia/Seoul", "coffeetime.jar"]
+CMD ["java", "-jar", "coffeetime.jar"]

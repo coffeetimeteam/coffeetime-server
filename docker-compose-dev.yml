@@ -5,7 +5,7 @@ services:
       - "8080:8080"
     build:
       context: .
-      dockerfile: ./Dockerfile-dev
+      dockerfile: Dockerfile-dev
     env_file:
       - .env
     environment:
