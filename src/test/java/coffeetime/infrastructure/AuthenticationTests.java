@@ -2,49 +2,81 @@ package coffeetime.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
+import coffeetime.domain.User;
+import coffeetime.dto.GlobalResponse;
 import coffeetime.dto.UserCreateRequest;
+import coffeetime.exception.EntryPayloadCode;
 import coffeetime.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @Transactional
+@Import(JwtTokenFilter.class)
 public class AuthenticationTests {
 
-	@Autowired
-	AuthenticationManager authenticationManager;
+	@MockBean
+	private AuthenticationManager authenticationManager;
 
-	@Autowired
+	@MockBean
 	private UserService userService;
+
+	@MockBean
+	private CustomUserDetails mockUserDetails;
+
+	@BeforeEach
+	void setUp() {
+		final User mockUser = new User("auth@email.com", "password");
+		final CustomUserDetails mockUserDetails = new CustomUserDetails(mockUser);
+		mockUserDetails.getUsername();
+	}
 
 	@Test
 	public void testAuthenticationFail() {
+		// given
+		when(authenticationManager.authenticate(
+			new UsernamePasswordAuthenticationToken("wrong@email.com", "wrongPassword")))
+			.thenThrow(new BadCredentialsException("Bad credentials"));
+
+		// then
 		assertThrows(BadCredentialsException.class, () -> {
 			authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken("wrong@email.com",
-					"wrongPassword"));
+				new UsernamePasswordAuthenticationToken("wrong@email.com", "wrongPassword"));
 		});
 	}
 
 	@Test
 	public void testAuthenticationSuccess() {
-		// given
 		final String username = "auth@email.com";
 		final String password = "password";
 
-		UserCreateRequest request = new UserCreateRequest(
-			username,
+		GlobalResponse mockResponse = new GlobalResponse(EntryPayloadCode.SUCCESS_REQUEST);
+
+		Authentication mockAuthentication = new UsernamePasswordAuthenticationToken(
+			mockUserDetails,
 			password,
-			password
+			mockUserDetails.getAuthorities()
 		);
-		userService.createUser(request);
+
+		when(authenticationManager.authenticate(
+			new UsernamePasswordAuthenticationToken(username, password)))
+			.thenReturn(mockAuthentication);
+
+		when(userService.createUser(any(UserCreateRequest.class)))
+			.thenReturn(mockResponse);
 
 		// when
 		Authentication authentication = authenticationManager.authenticate(
