@@ -1,11 +1,12 @@
 package coffeetime.dto;
 
-import coffeetime.domain.Role;
+import coffeetime.domain.type.RoleType;
 
-public record UserResponse (
+public record UserResponse(
 	Long id,
 	String username,
 	String nickname,
-	Role role
-){
+	RoleType roleType
+) {
+
 }

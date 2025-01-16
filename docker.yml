@@ -1,0 +1,38 @@
+services:
+  app:
+    image: changedan/coffeetime:latest
+    container_name: coffeetime_container
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_HOST=jdbc:mysql://13.209.48.93:3306/mysql_coffeetime
+      - DB_USERNAME=root
+      - DB_PASSWORD=coffeeTimeDb2024
+      - DISCORD_WEBHOOK=https://discord.com/api/webhooks/1317329997303644160/GRTqT8QLV8f1SHfMVz3LKYkKVj3lx9dUd8KPvwhQzaqBOK28bZwr76LeDP6bBC0soFBl
+      - ISSUER=coffeetime
+      - SECRET=coffeetime$!+secret__key#!@#must!@#be?#at@leas!!@#32!!!@#!@#bytes+!@#!@long!@_for@#_security_g$2a&4fE3!dB$7k0$1aB2#1T2cR@ZP6eF8z
+      - ACCESS_TOKEN_TIME=900000
+      - REFRESH_TOKEN_TIME=86400000
+    networks:
+      - app_net
+
+  nginx:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-proxy-manager
+    ports:
+      - 81:81
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx-proxy-manager/data:/data
+      - ./nginx-proxy-manager/letsencrypt:/etc/letsencrypt
+    depends_on:
+      - app
+    networks:
+      - app_net
+
+networks:
+  app_net:
+    external: true
+    name: app_network

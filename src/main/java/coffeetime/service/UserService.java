@@ -1,9 +1,9 @@
 package coffeetime.service;
 
 import coffeetime.domain.DefaultNickname;
-import coffeetime.domain.LoginType;
-import coffeetime.domain.Role;
 import coffeetime.domain.User;
+import coffeetime.domain.type.LoginType;
+import coffeetime.domain.type.RoleType;
 import coffeetime.dto.GlobalResponse;
 import coffeetime.dto.UserCreateRequest;
 import coffeetime.exception.CoffeeTimeException;
@@ -40,7 +40,7 @@ public class UserService {
 				request.getUsername(),
 				defaultNickname.generate(),
 				passwordEncoder.encode(request.getPassword()),
-				Role.GENERAL_USER
+				RoleType.GENERAL_USER
 			)
 		);
 		return new GlobalResponse(EntryPayloadCode.SUCCESS_REQUEST);
