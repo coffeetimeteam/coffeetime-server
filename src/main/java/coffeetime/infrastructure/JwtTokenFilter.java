@@ -1,8 +1,8 @@
 package coffeetime.infrastructure;
 
 import coffeetime.controller.ServerAlertController;
-import coffeetime.domain.Role;
 import coffeetime.domain.User;
+import coffeetime.domain.type.RoleType;
 import coffeetime.exception.JwtValidationException;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -84,7 +84,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 			new User(
 				Long.valueOf(subjectParts[0]),
 				subjectParts[1].trim(),
-				Role.valueOf((String) claims.get("role"))
+				RoleType.valueOf((String) claims.get("role"))
 			)
 		);
 	}

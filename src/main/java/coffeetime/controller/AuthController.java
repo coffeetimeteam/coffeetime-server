@@ -30,6 +30,14 @@ public class AuthController {
 		return ResponseEntity.ok().body(userTokens);
 	}
 
+	@PostMapping("/logout")
+	@PreAuthorize("@jwtTokenFilter.hasValidRefreshToken(#bearerToken)")
+	public ResponseEntity<String> logout(
+		@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+		tokenService.deleteRefreshToken(bearerToken);
+		return ResponseEntity.noContent().build();
+	}
+
 	@GetMapping("/token")
 	@PreAuthorize("@jwtTokenFilter.hasValidRefreshToken(#bearerToken)")
 	public ResponseEntity<TokensResponse> extendLogin(

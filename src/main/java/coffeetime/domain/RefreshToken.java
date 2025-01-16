@@ -19,7 +19,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RefreshToken {
 
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
 	@ManyToOne
@@ -32,7 +33,7 @@ public class RefreshToken {
 	@Column(nullable = false)
 	private Date expiredAt;
 
-	public RefreshToken(final Integer id, final User user,final String token,
+	public RefreshToken(final Integer id, final User user, final String token,
 		final Date expiredAt) {
 		this.id = id;
 		this.user = user;
@@ -40,7 +41,7 @@ public class RefreshToken {
 		this.expiredAt = expiredAt;
 	}
 
-	public RefreshToken(final User user, final String token, final Date expiredAt) {
-		this(null, user, token, expiredAt);
+	public RefreshToken(final User userId, final String token, final Date expiredAt) {
+		this(null, userId, token, expiredAt);
 	}
 }
