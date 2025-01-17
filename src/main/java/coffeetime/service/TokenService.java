@@ -58,13 +58,13 @@ public class TokenService {
 		}
 	}
 
-	public void deleteRefreshToken(String bearerToken) {
+	public void deleteRefreshToken(final String bearerToken) {
 		if (bearerToken == null) {
 			throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
 		}
 		final String token = bearerToken.replace("Bearer ", "");
 		final RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
-			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.FAIL_RENEWAL_TOKE));
+			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.FAIL_LOGOUT));
 		refreshTokenRepository.delete(refreshToken);
 	}
 }

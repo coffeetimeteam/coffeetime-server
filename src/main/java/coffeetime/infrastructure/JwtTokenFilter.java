@@ -10,6 +10,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
@@ -26,12 +28,13 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 @Slf4j
 public class JwtTokenFilter extends OncePerRequestFilter {
 
-	private static final String TOKEN_ENDPOINT = "/token";
-	private static final String BEARER_PREFIX = "Bearer ";
 
 	private final JwtUtility jwtUtility;
 	private final HandlerExceptionResolver handlerExceptionResolver;
 	private final ServerAlertController serverAlertController;
+
+	private static final String BEARER_PREFIX = "Bearer ";
+	private static final List<String> TOKEN_ENDPOINTS = Arrays.asList("/logout", "/token");
 
 
 	public JwtTokenFilter(JwtUtility jwtUtility,
@@ -60,7 +63,9 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 	}
 
 	private boolean isTokenEndpoint(HttpServletRequest request) {
-		return request.getRequestURI().endsWith(TOKEN_ENDPOINT);
+		String requestUri = request.getRequestURI();
+		return TOKEN_ENDPOINTS.stream()
+			.anyMatch(requestUri::endsWith);
 	}
 
 	private void processToken(String token, HttpServletRequest request,
@@ -112,7 +117,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 	public boolean hasValidRefreshToken(String bearerToken) {
 		if (bearerToken != null && bearerToken.startsWith(BEARER_PREFIX)) {
 			String token = bearerToken.substring(BEARER_PREFIX.length());
-			// 추가적으로 토큰 유효성 검증 로직을 여기에 추가
 			return !token.isEmpty();
 		}
 		log.debug("Invalid or missing Bearer token");
