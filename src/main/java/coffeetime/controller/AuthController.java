@@ -1,7 +1,9 @@
 package coffeetime.controller;
 
+import coffeetime.dto.GlobalResponse;
 import coffeetime.dto.LoginRequest;
 import coffeetime.dto.TokensResponse;
+import coffeetime.exception.EntryPayloadCode;
 import coffeetime.service.AuthService;
 import coffeetime.service.TokenService;
 import jakarta.validation.Valid;
@@ -32,10 +34,10 @@ public class AuthController {
 
 	@PostMapping("/logout")
 	@PreAuthorize("@jwtTokenFilter.hasValidRefreshToken(#bearerToken)")
-	public ResponseEntity<String> logout(
+	public ResponseEntity<GlobalResponse> logout(
 		@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
 		tokenService.deleteRefreshToken(bearerToken);
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok().body(new GlobalResponse(EntryPayloadCode.SUCCESS_LOGOUT));
 	}
 
 	@GetMapping("/token")
