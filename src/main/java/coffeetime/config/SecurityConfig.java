@@ -63,10 +63,10 @@ public class SecurityConfig {
 					.requestMatchers("/api/v1/auth/**").permitAll()
 					.requestMatchers("/api/health-check").permitAll()
 					.requestMatchers("api/v1/my").authenticated()
+					.requestMatchers("api/v1/coffee/**").authenticated()
 					.requestMatchers("api/v1/my/nickname").hasAnyAuthority(RoleType.GENERAL_USER.name(),
 						RoleType.SPECIAL_USER.name())
 					.anyRequest().authenticated())
-
 			.csrf(csrf -> csrf.disable())
 			.exceptionHandling(exception -> exception.authenticationEntryPoint(
 				(request, response, authException) ->

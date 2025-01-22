@@ -20,7 +20,10 @@ spring:
         secretKey: ${S3_SECRET_KEY}
       region:
         static: ap-northeast-2
+  server:
+    url: ${SERVER_URL}
 
 logging:
   discord:
     webhook-url: ${DISCORD_WEBHOOK}
+
