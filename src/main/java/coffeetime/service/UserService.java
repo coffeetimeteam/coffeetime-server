@@ -34,14 +34,14 @@ public class UserService {
 		if (!request.getPassword().equals(request.getConfirmPassword())) {
 			throw new CoffeeTimeException(EntryPayloadCode.INVALID_PASSWORD);
 		}
+
 		userRepository.save(
-			new User(
+			User.createUser(
 				LoginType.EMAIL,
 				request.getUsername(),
 				defaultNickname.generate(),
 				passwordEncoder.encode(request.getPassword()),
-				RoleType.GENERAL_USER
-			)
+				RoleType.GENERAL_USER)
 		);
 		return new GlobalResponse(EntryPayloadCode.SUCCESS_REQUEST);
 	}
@@ -52,32 +52,4 @@ public class UserService {
 		return userRepository.findByUsername(username)
 			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_USER));
 	}
-
-//	public void updateNickname(final NicknameUpdateRequest request) {
-//		final User currentUser = getCurrentUser();
-//		if (userRepository.existsByNickname(request.nickname())) {
-//			throw new CoffeeTimeException(EntryPayloadCode.DUPLICATED_NICKNAME);
-//		}
-//		final User updatedUser = new User(
-//			currentUser.getLoginType(),
-//			currentUser.getId(),
-//			currentUser.getUsername(),
-//			request.nickname(),
-//			currentUser.getRole()
-//		);
-//		userRepository.save(updatedUser);
-//	}
-//
-//	public void updatePassword(final PasswordUpdateRequest request) {
-//		final User currentUser = getCurrentUser();
-//		if (!passwordEncoder.matches(currentUser.getPassword(),
-//			request.currentPassword())) {
-//			throw new CoffeeTimeException(EntryPayloadCode.INVALID_PASSWORD);
-//		}
-//		final User updateUser = new User(
-//			currentUser.getUsername(),
-//			passwordEncoder.encode(request.newPassword())
-//		);
-//		userRepository.save(updateUser);
-//	}
 }

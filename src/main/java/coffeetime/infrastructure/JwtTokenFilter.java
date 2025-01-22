@@ -114,15 +114,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 		return authentication;
 	}
 
-	public boolean hasValidRefreshToken(String bearerToken) {
-		if (bearerToken != null && bearerToken.startsWith(BEARER_PREFIX)) {
-			String token = bearerToken.substring(BEARER_PREFIX.length());
-			return !token.isEmpty();
-		}
-		log.debug("Invalid or missing Bearer token");
-		return false;
-	}
-
 	private String extractToken(HttpServletRequest request) {
 		String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 		if (header != null && header.startsWith(BEARER_PREFIX)) {

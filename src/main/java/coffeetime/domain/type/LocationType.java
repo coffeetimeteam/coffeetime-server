@@ -12,4 +12,13 @@ public enum LocationType {
 	LOCAL_CAFE("개인카페");
 
 	private final String location;
+
+	public static LocationType fromDisplayName(String displayName) {
+		for (LocationType type : LocationType.values()) {
+			if (type.location.equals(displayName)) {
+				return type;
+			}
+		}
+		throw new IllegalArgumentException("No enum constant for display name: " + displayName);
+	}
 }
