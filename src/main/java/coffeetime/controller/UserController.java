@@ -5,8 +5,14 @@ import coffeetime.dto.GlobalResponse;
 import coffeetime.dto.UserCreateRequest;
 import coffeetime.dto.UserResponse;
 import coffeetime.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +38,19 @@ public class UserController {
 
 	@GetMapping("/my")
 	@PreAuthorize("isAuthenticated()")
-	public ResponseEntity<UserResponse> getUserInfo() {
+	@Operation(
+		security = {@SecurityRequirement(name = "bearerToken")},
+		parameters = {
+			@Parameter(
+				name = HttpHeaders.AUTHORIZATION,
+				required = true,
+				in = ParameterIn.HEADER,
+				schema = @Schema(type = "string", format = "bearer")
+			)
+		}
+	)
+	public ResponseEntity<UserResponse> getUserInfo(
+	) {
 		final User user = userService.getCurrentUser();
 		final UserResponse response = new UserResponse(user.getId(), user.getUsername(),
 			user.getNickname(), user.getRole());

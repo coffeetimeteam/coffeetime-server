@@ -1,10 +1,5 @@
 package coffeetime.dto;
 
-import coffeetime.domain.type.CoffeeType;
-import coffeetime.domain.type.LocationType;
-import coffeetime.domain.type.PriceType;
-import coffeetime.domain.type.SizeType;
-import coffeetime.domain.type.TasteType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
@@ -44,23 +39,4 @@ public record CoffeeCreateRequest(
 	int coffeeScore
 ) {
 
-	public LocationType getLocationType() {
-		return LocationType.valueOf(location.toUpperCase());
-	}
-
-	public CoffeeType getCoffeeType() {
-		return CoffeeType.valueOf(coffee.toUpperCase());
-	}
-
-	public SizeType getSizeType() {
-		return SizeType.valueOf(size.toUpperCase());
-	}
-
-	public TasteType getTasteType() {
-		return TasteType.valueOf(taste.toUpperCase());
-	}
-
-	public PriceType getPriceType() {
-		return PriceType.valueOf(price.toUpperCase());
-	}
 }

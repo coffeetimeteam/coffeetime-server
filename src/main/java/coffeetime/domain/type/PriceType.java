@@ -12,4 +12,12 @@ public enum PriceType {
 
 	private final String price;
 
+	public static PriceType fromDisplayName(String displayName) {
+		for (PriceType type : PriceType.values()) {
+			if (type.price.equals(displayName)) {
+				return type;
+			}
+		}
+		throw new IllegalArgumentException("No enum constant for display name: " + displayName);
+	}
 }

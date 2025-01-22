@@ -49,7 +49,7 @@ public class Image {
 
 	@Column(nullable = false)
 	@Enumerated(value = EnumType.STRING)
-	private StatusType status = StatusType.USABLE;
+	private StatusType status = StatusType.ACTIVE;
 
 	@Builder
 	private Image(Long id, Coffee coffee, String url, LocalDateTime createdAt,
@@ -69,7 +69,7 @@ public class Image {
 				.coffee(coffee)
 				.url(url)
 				.createdAt(LocalDateTime.now())
-				.status(StatusType.USABLE)
+				.status(StatusType.ACTIVE)
 				.build())
 			.collect(Collectors.toList());
 	}

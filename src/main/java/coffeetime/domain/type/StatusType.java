@@ -2,6 +2,7 @@ package coffeetime.domain.type;
 
 public enum StatusType {
 
-	USABLE,
-	DELETED
+	ACTIVE,
+	REMOVED,
+	FAILED
 }
