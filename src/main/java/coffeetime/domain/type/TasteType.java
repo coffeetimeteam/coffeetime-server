@@ -12,4 +12,14 @@ public enum TasteType {
 	DONT_LIKE("취향이 아닌");
 
 	private final String taste;
+
+
+	public static TasteType fromDisplayName(String displayName) {
+		for (TasteType type : TasteType.values()) {
+			if (type.taste.equals(displayName)) {
+				return type;
+			}
+		}
+		throw new IllegalArgumentException("No enum constant for display name: " + displayName);
+	}
 }

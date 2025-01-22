@@ -1,9 +1,9 @@
 package coffeetime.dto;
 
 import coffeetime.domain.Coffee;
-import java.util.List;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 public record CoffeeResponse(
 	Long id,

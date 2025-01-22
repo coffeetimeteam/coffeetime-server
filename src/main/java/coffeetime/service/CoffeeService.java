@@ -8,7 +8,6 @@ import coffeetime.domain.type.LocationType;
 import coffeetime.domain.type.PriceType;
 import coffeetime.domain.type.SizeType;
 import coffeetime.domain.type.TasteType;
-import coffeetime.domain.type.UploadStatusType;
 import coffeetime.dto.CoffeeCreateRequest;
 import coffeetime.dto.CoffeeFormResponse;
 import coffeetime.dto.CoffeeResponse;
@@ -54,9 +53,6 @@ public class CoffeeService {
 		final List<String> priceList = Arrays.stream(PriceType.values()).map(PriceType::getPrice)
 			.toList();
 		final List<Integer> coffeeScoreList = List.of(1, 2, 3, 4, 5);
-		final List<String> uploadStatusList =
-			Arrays.stream(UploadStatusType.values()).map(UploadStatusType::getUploadStatus)
-				.toList();
 		return CoffeeFormResponse.builder()
 			.locationType(locationList)
 			.coffeeType(coffeeList)
@@ -64,7 +60,6 @@ public class CoffeeService {
 			.tasteType(tasteList)
 			.priceType(priceList)
 			.coffeeScoreType(coffeeScoreList)
-			.uploadStatusType(uploadStatusList)
 			.build();
 	}
 
@@ -74,11 +69,11 @@ public class CoffeeService {
 			user,
 			request.rememberDate(),
 			request.rememberTime(),
-			request.getLocationType(),
-			request.getCoffeeType(),
-			request.getSizeType(),
-			request.getTasteType(),
-			request.getPriceType(),
+			LocationType.fromDisplayName(request.location()),
+			CoffeeType.fromDisplayName(request.coffee()),
+			SizeType.fromDisplayName(request.size()),
+			TasteType.fromDisplayName(request.taste()),
+			PriceType.fromDisplayName(request.price()),
 			request.coffeeScore(),
 			null);
 		final Coffee coffee = coffeeRepository.save(saveCoffee);

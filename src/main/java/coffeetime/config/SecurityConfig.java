@@ -15,7 +15,6 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -60,10 +59,14 @@ public class SecurityConfig {
 		throws Exception {
 		http.authorizeHttpRequests(
 				auth -> auth
-					.requestMatchers("/api/v1/auth/**").permitAll()
-					.requestMatchers("/api/health-check").permitAll()
-					.requestMatchers("api/v1/my").authenticated()
-					.requestMatchers("api/v1/coffee/**").authenticated()
+					.requestMatchers("/v3/api-docs/**",
+						"/swagger-ui/**",
+						"/swagger-ui.html",
+						"/webjars/**",
+						"/swagger-resources/**")
+					.permitAll()
+					.requestMatchers("/api/v1/auth/**", "/api/health-check").permitAll()
+					.requestMatchers("api/v1/coffee/**", "api/v1/my").authenticated()
 					.requestMatchers("api/v1/my/nickname").hasAnyAuthority(RoleType.GENERAL_USER.name(),
 						RoleType.SPECIAL_USER.name())
 					.anyRequest().authenticated())
@@ -99,14 +102,4 @@ public class SecurityConfig {
 		return http.build();
 	}
 
-	@Bean
-	public WebSecurityCustomizer webSecurityCustomizer() {
-		return webSecurity -> {
-			webSecurity.ignoring().requestMatchers(
-				"/v3/api-docs/**",
-				"/swagger-resources/**",
-				"/swagger-ui/**"
-			);
-		};
-	}
 }

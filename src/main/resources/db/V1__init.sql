@@ -39,12 +39,12 @@ CREATE TABLE IF NOT EXISTS coffee
 
 CREATE TABLE IF NOT EXISTS image
 (
-    id         bigint                     not null auto_increment primary key,
-    coffee_id  bigint                     null,
-    url        varchar(384)               not null unique,
-    created_at datetime(6)                not null,
-    deleted_at datetime(6)                null,
-    status     enum ('USABLE', 'DELETED') not null,
+    id         bigint                               not null auto_increment primary key,
+    coffee_id  bigint                               null,
+    url        varchar(384)                         not null unique,
+    created_at datetime(6)                          not null,
+    deleted_at datetime(6)                          null,
+    status     enum ('ACTIVE', 'REMOVED', 'FAILED') not null,
     constraint fk_image__coffee
         foreign key (coffee_id) references coffee (id)
 );

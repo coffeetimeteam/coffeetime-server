@@ -11,4 +11,12 @@ public enum CoffeeType {
 
 	private final String coffee;
 
+	public static CoffeeType fromDisplayName(String displayName) {
+		for (CoffeeType type : CoffeeType.values()) {
+			if (type.coffee.equals(displayName)) {
+				return type;
+			}
+		}
+		throw new IllegalArgumentException("No enum constant for display name: " + displayName);
+	}
 }

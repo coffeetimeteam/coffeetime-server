@@ -41,7 +41,7 @@ public class CoffeeRepositoryTests {
 			LocalTime.now(),
 			LocationType.HOME,
 			CoffeeType.COFFEE,
-			SizeType.ENOUGH,
+			SizeType.MEDIUM,
 			TasteType.DELICIOUS,
 			PriceType.AVERAGE,
 			5,
