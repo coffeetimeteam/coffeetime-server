@@ -12,4 +12,5 @@ public enum LocationType {
 	LOCAL_CAFE("개인카페");
 
 	private final String location;
+
 }

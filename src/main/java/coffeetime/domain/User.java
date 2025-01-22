@@ -1,6 +1,5 @@
 package coffeetime.domain;
 
-import static lombok.AccessLevel.PROTECTED;
 
 import coffeetime.domain.type.LoginType;
 import coffeetime.domain.type.RoleType;
@@ -14,6 +13,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Filter;
@@ -25,7 +26,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 @Entity
 @Table(name = "user")
 @Getter
-@NoArgsConstructor(access = PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql = "UPDATE user SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @FilterDef(
 	name = "deletedFilter",
@@ -65,6 +66,7 @@ public class User {
 	@Column(name = "deleted_at", nullable = true)
 	private LocalDateTime deletedAt = null;
 
+	@Builder
 	public User(final Long id, final LoginType loginType, final String username,
 		final String nickname, final String password, final RoleType role) {
 		this.id = id;
@@ -76,6 +78,18 @@ public class User {
 		this.modifiedAt = LocalDateTime.now();
 		this.lastLoginDate = LocalDateTime.now();
 	}
+
+	public static User createUser(final LoginType loginType, final String username,
+		final String nickname, final String password, final RoleType role) {
+		return User.builder()
+			.loginType(loginType)
+			.username(username)
+			.nickname(nickname)
+			.password(password)
+			.role(role)
+			.build();
+	}
+
 
 	public User(final LoginType loginType, final String username, final String nickname,
 		final String password, final RoleType role) {
