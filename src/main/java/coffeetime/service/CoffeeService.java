@@ -64,7 +64,8 @@ public class CoffeeService {
 	}
 
 	@Transactional
-	public void createCoffee(User user, CoffeeCreateRequest request, List<MultipartFile> images) {
+	public void createCoffee(final User user, final CoffeeCreateRequest request,
+		final List<MultipartFile> images) {
 		final Coffee saveCoffee = Coffee.createCoffee(
 			user,
 			request.rememberDate(),
@@ -87,11 +88,28 @@ public class CoffeeService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<CoffeeResponse> getCoffeesByDate(User user, LocalDate date) {
-		LocalDate targetDate = date != null ? date : LocalDate.now();
-		List<Coffee> coffees = coffeeRepository.findDailyCoffees(
+	public List<CoffeeResponse> findCoffeesByDate(final User user, final LocalDate date) {
+		final LocalDate targetDate = date != null ? date : LocalDate.now();
+		final List<Coffee> coffees = coffeeRepository.findCoffeesByDate(
 			user, targetDate);
+		return coffees.stream()
+			.map(coffee -> {
+				List<String> imageUrls = coffee.getImages().stream()
+					.map(Image::getUrl)
+					.map(key -> serverUrl + "/api/v1/images/" + key)
+					.collect(Collectors.toList());
+				return CoffeeResponse.of(coffee, imageUrls);
+			})
+			.collect(Collectors.toList());
+	}
 
+	@Transactional(readOnly = true)
+	public List<CoffeeResponse> findCoffeesByMonth(final User user, final Integer year,
+		final Integer month) {
+		final LocalDate targetDate = (year == null || month == null) ? LocalDate.now() :
+			LocalDate.of(year, month, 1);
+		final List<Coffee> coffees = coffeeRepository.findCoffeesByMonth(user, targetDate.getYear(),
+			targetDate.getMonthValue());
 		return coffees.stream()
 			.map(coffee -> {
 				List<String> imageUrls = coffee.getImages().stream()

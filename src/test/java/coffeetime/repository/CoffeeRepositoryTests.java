@@ -55,7 +55,7 @@ public class CoffeeRepositoryTests {
 		coffeeRepository.save(testCoffee);
 
 		// when
-		List<Coffee> coffees = coffeeRepository.findDailyCoffees(testUser, LocalDate.now());
+		List<Coffee> coffees = coffeeRepository.findCoffeesByDate(testUser, LocalDate.now());
 
 		// then
 		assertThat(coffees).isNotEmpty();
