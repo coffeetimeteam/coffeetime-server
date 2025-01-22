@@ -10,7 +10,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,7 +32,6 @@ public class AuthController {
 	}
 
 	@PostMapping("/logout")
-	@PreAuthorize("@jwtTokenFilter.hasValidRefreshToken(#bearerToken)")
 	public ResponseEntity<GlobalResponse> logout(
 		@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
 		tokenService.deleteRefreshToken(bearerToken);
@@ -41,7 +39,6 @@ public class AuthController {
 	}
 
 	@GetMapping("/token")
-	@PreAuthorize("@jwtTokenFilter.hasValidRefreshToken(#bearerToken)")
 	public ResponseEntity<TokensResponse> extendLogin(
 		@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
 		final TokensResponse userTokens = tokenService.renewalTokens(bearerToken);

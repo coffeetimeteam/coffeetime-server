@@ -1,5 +1,6 @@
 package coffeetime.controller;
 
+import coffeetime.config.SecurityRequiredOperation;
 import coffeetime.domain.User;
 import coffeetime.dto.CoffeeCreateRequest;
 import coffeetime.dto.CoffeeFormResponse;
@@ -14,7 +15,6 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,25 +31,36 @@ public class CoffeeController {
 	private final UserService userService;
 	private final CoffeeService coffeeService;
 
-	@GetMapping
-	@PreAuthorize("isAuthenticated()")
-	public ResponseEntity<List<CoffeeResponse>> getCoffee(
-		@RequestParam(required = false) LocalDate date
+	@GetMapping("/calendar")
+	@SecurityRequiredOperation
+	public ResponseEntity<List<CoffeeResponse>> getCoffeesByMonth(
+		@RequestParam(required = false) final Integer year, final Integer month
 	) {
 		final User currentUser = userService.getCurrentUser();
-		final List<CoffeeResponse> response = coffeeService.getCoffeesByDate(currentUser, date);
+		final List<CoffeeResponse> response = coffeeService.findCoffeesByMonth(currentUser, year,
+			month);
+		return ResponseEntity.ok().body(response);
+	}
+
+	@GetMapping
+	@SecurityRequiredOperation
+	public ResponseEntity<List<CoffeeResponse>> getCoffee(
+		@RequestParam(required = false) final LocalDate date
+	) {
+		final User currentUser = userService.getCurrentUser();
+		final List<CoffeeResponse> response = coffeeService.findCoffeesByDate(currentUser, date);
 		return ResponseEntity.ok().body(response);
 	}
 
 	@GetMapping("/form")
-	@PreAuthorize("isAuthenticated()")
+	@SecurityRequiredOperation
 	public ResponseEntity<CoffeeFormResponse> createCoffee() {
 		final CoffeeFormResponse response = coffeeService.getForm();
 		return ResponseEntity.ok().body(response);
 	}
 
 	@PostMapping("/create")
-	@PreAuthorize("isAuthenticated()")
+	@SecurityRequiredOperation
 	public ResponseEntity<GlobalResponse> createCoffeeTime(
 		@Valid @ModelAttribute CoffeeCreateRequest request,
 		@RequestParam(value = "images", required = false) List<MultipartFile> images) {
