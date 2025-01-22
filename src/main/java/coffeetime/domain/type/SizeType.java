@@ -12,4 +12,5 @@ public enum SizeType {
 	ENOUGH("적당한 거");
 
 	private final String size;
+
 }

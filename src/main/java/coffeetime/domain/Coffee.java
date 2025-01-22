@@ -1,12 +1,10 @@
 package coffeetime.domain;
 
-import coffeetime.domain.type.CoffeeScoreType;
 import coffeetime.domain.type.CoffeeType;
 import coffeetime.domain.type.LocationType;
 import coffeetime.domain.type.PriceType;
 import coffeetime.domain.type.SizeType;
 import coffeetime.domain.type.TasteType;
-import coffeetime.domain.type.UploadStatusType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,15 +15,18 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Null;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import jakarta.persistence.Column;
+import java.util.ArrayList;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "coffee")
@@ -40,40 +41,44 @@ public class Coffee {
 
 	@ManyToOne
 	@JoinColumn(name = "user_id", referencedColumnName = "id")
-	private User userId;
+	private User user;
 
+	@Column(nullable = false)
 	private LocalDate rememberDate;
 
+	@Column(nullable = false, columnDefinition = "TIME(0)")
 	private LocalTime rememberTime;
 
-	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	@Enumerated(value = EnumType.STRING)
 	private LocationType locationType;
 
-	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	@Enumerated(value = EnumType.STRING)
 	private CoffeeType coffeeType;
 
-	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	@Enumerated(value = EnumType.STRING)
 	private SizeType sizeType;
 
-	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	@Enumerated(value = EnumType.STRING)
 	private TasteType tasteType;
 
-	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	@Enumerated(value = EnumType.STRING)
 	private PriceType priceType;
 
-	@Enumerated(EnumType.STRING)
-	private CoffeeScoreType coffeeScoreType;
+	@Column(nullable = false)
+	private Integer coffeeScore;
 
-	@OneToMany(targetEntity = Image.class, cascade = CascadeType.REMOVE)
-	private List<Image> images;
-
-	@Enumerated(EnumType.STRING)
-	private UploadStatusType uploadStatus;
+	@OneToMany(mappedBy = "coffee", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Image> images = new ArrayList<>();
 
 	@Builder
 	private Coffee(
 		final Long id,
-		final User userId,
+		final User user,
 		final LocalDate rememberDate,
 		final LocalTime rememberTime,
 		final LocationType locationType,
@@ -81,12 +86,11 @@ public class Coffee {
 		final SizeType sizeType,
 		final TasteType tasteType,
 		final PriceType priceType,
-		final CoffeeScoreType coffeeScoreType,
-		final List<Image> images,
-		final UploadStatusType uploadStatus
+		final Integer coffeeScore,
+		final List<Image> images
 	) {
 		this.id = id;
-		this.userId = userId;
+		this.user = user;
 		this.rememberDate = rememberDate;
 		this.rememberTime = rememberTime;
 		this.locationType = locationType;
@@ -94,19 +98,33 @@ public class Coffee {
 		this.sizeType = sizeType;
 		this.tasteType = tasteType;
 		this.priceType = priceType;
-		this.coffeeScoreType = coffeeScoreType;
-		this.images = images != null ? images : new ArrayList<>();
-		this.uploadStatus = uploadStatus;
+		this.coffeeScore = coffeeScore;
+		this.images = images;
 	}
 
-	public static CoffeeBuilder builderWithoutImages() {
+	public static Coffee createCoffee(
+		final User user,
+		final LocalDate rememberDate,
+		final LocalTime rememberTime,
+		final LocationType locationType,
+		final CoffeeType coffeeType,
+		final SizeType sizeType,
+		final TasteType tasteType,
+		final PriceType priceType,
+		final Integer coffeeScore,
+		final List<Image> images
+	) {
 		return builder()
-			.images(new ArrayList<>());
-	}
-
-	public static CoffeeBuilder builderWithImages(List<Image> images) {
-		return builder()
-			.images(images);
+			.user(user)
+			.rememberDate(rememberDate)
+			.rememberTime(rememberTime)
+			.locationType(locationType)
+			.coffeeType(coffeeType)
+			.sizeType(sizeType)
+			.tasteType(tasteType)
+			.priceType(priceType)
+			.coffeeScore(coffeeScore)
+			.images(images)
+			.build();
 	}
 }
-

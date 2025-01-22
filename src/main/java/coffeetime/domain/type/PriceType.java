@@ -11,4 +11,5 @@ public enum PriceType {
 	EXPENSIVE("비싼");
 
 	private final String price;
+
 }

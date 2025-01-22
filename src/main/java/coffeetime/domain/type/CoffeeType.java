@@ -10,4 +10,5 @@ public enum CoffeeType {
 	NONE_COFFEE("none-coffee");;
 
 	private final String coffee;
+
 }
