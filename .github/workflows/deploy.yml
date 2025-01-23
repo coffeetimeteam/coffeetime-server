@@ -2,7 +2,7 @@ name: Docker Build and Deploy
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "feat-31" ]
     paths:
       - "./**"
       - ".github/workflows/deploy.yml"
@@ -59,7 +59,7 @@ jobs:
           build-args: --no-cache
 
   docker-pull-and-run:
-    runs-on: [ self-hosted, deploy ]
+    runs-on: [ self-hosted, ec2 ]
     if: ${{ needs.docker-buildx-and-push.result == 'success' }}
     needs: [ docker-buildx-and-push ]
     steps:
