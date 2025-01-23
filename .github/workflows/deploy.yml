@@ -6,6 +6,7 @@ on:
     paths:
       - "./**"
       - ".github/workflows/deploy.yml"
+
 jobs:
   docker-buildx-and-push:
     runs-on: ubuntu-latest

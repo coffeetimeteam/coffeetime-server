@@ -48,11 +48,11 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
     implementation 'com.nimbusds:nimbus-jose-jwt:9.47'
-    runtimeOnly 'com.mysql:mysql-connector-j'
     implementation('com.github.napstr:logback-discord-appender:1.0.0')
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation("software.amazon.awssdk:s3:2.25.40")
-    testImplementation "org.testcontainers:mysql:1.20.4"
+    runtimeOnly 'org.postgresql:postgresql'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 }
 
 dependencyManagement {

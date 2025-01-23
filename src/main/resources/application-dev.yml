@@ -4,12 +4,6 @@ spring:
       on-profile: "dev"
   datasource:
     url: ${DB_HOST}
-    username: ${DB_USERNAME}
+    username: ${DB_USER}
     password: ${DB_PASSWORD}
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        format_sql: true
+    driver-class-name: org.postgresql.Driver
