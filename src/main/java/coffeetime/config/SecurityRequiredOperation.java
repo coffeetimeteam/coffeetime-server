@@ -9,6 +9,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.HttpHeaders;
 
 @Target(ElementType.METHOD)
@@ -22,7 +23,9 @@ import org.springframework.http.HttpHeaders;
 	})
 public @interface SecurityRequiredOperation {
 
+	@AliasFor(annotation = Operation.class, attribute = "summary")
 	String summary() default "";
 
+	@AliasFor(annotation = Operation.class, attribute = "description")
 	String description() default "";
 }

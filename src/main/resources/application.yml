@@ -22,6 +22,13 @@ spring:
         static: ap-northeast-2
   server:
     url: ${SERVER_URL}
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
 
 logging:
   discord:

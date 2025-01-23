@@ -24,7 +24,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.springframework.data.annotation.LastModifiedDate;
 
 @Entity
-@Table(name = "user")
+@Table(name = "\"user\"")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql = "UPDATE user SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")

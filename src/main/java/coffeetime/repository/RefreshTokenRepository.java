@@ -15,6 +15,6 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Inte
 	List<RefreshToken> findByUsername(String username);
 
 	@Modifying
-	@Query("delete from RefreshToken rt where rt.expiredAt <= CURRENT_TIME")
+	@Query("delete from RefreshToken rt where rt.expiredAt <= CURRENT_TIMESTAMP")
 	int deleteByExpiredAt();
 }
