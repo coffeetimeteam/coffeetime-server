@@ -76,7 +76,7 @@ public class CoffeeServiceTests {
 		coffeeService.createCoffee(testUser, testRequest, List.of(testImage));
 
 		// then
-		List<CoffeeResponse> responses = coffeeService.getCoffeesByDate(testUser, LocalDate.now());
+		List<CoffeeResponse> responses = coffeeService.findCoffeesByDate(testUser, LocalDate.now());
 		assertThat(responses).isNotEmpty();
 
 		CoffeeResponse response = responses.get(0);
@@ -102,7 +102,7 @@ public class CoffeeServiceTests {
 		);
 
 		// when
-		List<CoffeeResponse> responses = coffeeService.getCoffeesByDate(testUser, LocalDate.now());
+		List<CoffeeResponse> responses = coffeeService.findCoffeesByDate(testUser, LocalDate.now());
 
 		// then
 		assertThat(responses).isNotNull();
@@ -136,7 +136,7 @@ public class CoffeeServiceTests {
 		coffeeService.createCoffee(testUser, testRequest, List.of());
 
 		// then
-		List<CoffeeResponse> responses = coffeeService.getCoffeesByDate(testUser, LocalDate.now());
+		List<CoffeeResponse> responses = coffeeService.findCoffeesByDate(testUser, LocalDate.now());
 		assertThat(responses).isNotEmpty();
 
 		CoffeeResponse response = responses.get(0);
