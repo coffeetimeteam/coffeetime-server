@@ -1,9 +1,0 @@
-spring:
-  config:
-    activate:
-      on-profile: "dev"
-  datasource:
-    url: ${DB_HOST}
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver

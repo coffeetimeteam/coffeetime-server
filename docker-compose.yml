@@ -6,9 +6,8 @@ services:
     env_file:
       - .env
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
       - DB_HOST=${DB_HOST}
-      - DB_USER=${DB_USER}
+      - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
       - DISCORD_WEBHOOK=${DISCORD_WEBHOOK}
       - ISSUER=${ISSUER}
