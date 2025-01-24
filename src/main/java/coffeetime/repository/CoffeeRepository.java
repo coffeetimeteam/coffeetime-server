@@ -10,19 +10,20 @@ import org.springframework.data.repository.query.Param;
 
 public interface CoffeeRepository extends JpaRepository<Coffee, Long> {
 
-	@Query(""" 
+	@Query("""
 		SELECT coffee FROM Coffee coffee
 		WHERE coffee.user = :user
-		AND coffee.rememberDate = :date
+		AND DATE(coffee.rememberDate) = :date
 		ORDER BY coffee.rememberTime ASC
 		""")
 	List<Coffee> findCoffeesByDate(@Param("user") User user, @Param("date") LocalDate date);
 
+	// Query to find coffees by a specific user, year, and month
 	@Query("""
 		SELECT coffee FROM Coffee coffee
 		WHERE coffee.user = :user
-		AND FUNCTION('YEAR', coffee.rememberDate) = :year
-		AND FUNCTION('MONTH', coffee.rememberDate) = :month
+		AND EXTRACT(YEAR FROM coffee.rememberDate) = :year
+		AND EXTRACT(MONTH FROM coffee.rememberDate) = :month
 		""")
 	List<Coffee> findCoffeesByMonth(@Param("user") User user, @Param("year") int year,
 		@Param("month") int month);
