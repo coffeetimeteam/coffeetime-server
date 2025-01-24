@@ -85,7 +85,8 @@ public class SecurityConfig {
 						HttpServletRequest request) {
 						CorsConfiguration config = new CorsConfiguration();
 						config.setAllowedOriginPatterns(
-							Arrays.asList("http://localhost:3030",
+							Arrays.asList(
+								"http://localhost:3030",
 								"https://coffeetime.parkgadan.com")
 						);
 						config.setAllowedMethods(

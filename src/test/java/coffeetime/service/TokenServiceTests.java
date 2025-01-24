@@ -112,7 +112,7 @@ public class TokenServiceTests {
 			.thenReturn(Optional.of(savedToken));
 
 		// when
-		tokenService.(bearerToken);
+		tokenService.deleteRefreshToken(bearerToken);
 
 		// then
 		// verify deletion was called (no exception thrown)

@@ -1,10 +1,6 @@
 spring:
   profiles:
-    group:
-      dev: "dev"
-      prod: "prod"
-    include:
-      - security
+    active: docker
   devtools:
     restart:
       enabled: true
@@ -22,10 +18,16 @@ spring:
         static: ap-northeast-2
   server:
     url: ${SERVER_URL}
+  datasource:
+    url: ${DB_HOST}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: update
+      dialect: org.hibernate.dialect.PostgreSQLDialect
     properties:
       hibernate:
         format_sql: true
@@ -34,3 +36,9 @@ logging:
   discord:
     webhook-url: ${DISCORD_WEBHOOK}
 
+token:
+  jwt:
+    issuer: ${ISSUER}
+    secret: ${SECRET}
+    access-token-expiration: ${ACCESS_TOKEN_TIME}
+    refresh-token-expiration: ${REFRESH_TOKEN_TIME}

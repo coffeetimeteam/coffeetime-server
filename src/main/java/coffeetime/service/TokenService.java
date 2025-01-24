@@ -5,6 +5,7 @@ import coffeetime.domain.User;
 import coffeetime.dto.TokensResponse;
 import coffeetime.exception.CoffeeTimeException;
 import coffeetime.exception.EntryPayloadCode;
+import coffeetime.infrastructure.JwtTokenFilter;
 import coffeetime.infrastructure.JwtUtility;
 import coffeetime.repository.RefreshTokenRepository;
 import coffeetime.repository.UserRepository;
@@ -20,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class TokenService {
 
 	private final UserRepository userRepository;
+	private final JwtTokenFilter jwtTokenFilter;
+	private final UserService userService;
 	@Value("${token.jwt.refresh-token-expiration}")
 	private Integer refreshTokenExpiration;
 	private final RefreshTokenRepository refreshTokenRepository;
