@@ -32,6 +32,34 @@ public class CoffeeController {
 	private final UserService userService;
 	private final CoffeeService coffeeService;
 
+	@PostMapping("/create")
+	@SecurityRequiredOperation
+	public ResponseEntity<GlobalResponse> createCoffee(
+		@Valid @ModelAttribute CoffeeCreateRequest request,
+		@RequestParam(value = "images", required = false) List<MultipartFile> images) {
+		final User currentUser = userService.getCurrentUser();
+		coffeeService.createCoffee(currentUser, request, images);
+		return ResponseEntity.ok().body(new GlobalResponse(EntryPayloadCode.SUCCESS_REQUEST));
+	}
+
+	@GetMapping("/form")
+	@SecurityRequiredOperation
+	public ResponseEntity<CoffeeFormResponse> createCoffee() {
+		final CoffeeFormResponse response = coffeeService.getForm();
+		return ResponseEntity.ok().body(response);
+	}
+
+	@GetMapping
+	@SecurityRequiredOperation
+	public ResponseEntity<List<CoffeeResponse>> getCoffeesByDate(
+		@RequestParam(required = false) final LocalDate date
+	) {
+		final User currentUser = userService.getCurrentUser();
+		final List<CoffeeResponse> response = coffeeService.findCoffeesByDate(currentUser, date);
+		return ResponseEntity.ok().body(response);
+	}
+
+
 	@GetMapping("/calendar")
 	@SecurityRequiredOperation
 	public ResponseEntity<List<Map<String, Object>>> getCoffeesByMonth(
@@ -44,30 +72,14 @@ public class CoffeeController {
 		return ResponseEntity.ok().body(response);
 	}
 
-	@GetMapping
-	@SecurityRequiredOperation
-	public ResponseEntity<List<CoffeeResponse>> getCoffee(
-		@RequestParam(required = false) final LocalDate date
-	) {
-		final User currentUser = userService.getCurrentUser();
-		final List<CoffeeResponse> response = coffeeService.findCoffeesByDate(currentUser, date);
-		return ResponseEntity.ok().body(response);
-	}
-
-	@GetMapping("/form")
-	@SecurityRequiredOperation
-	public ResponseEntity<CoffeeFormResponse> createCoffee() {
-		final CoffeeFormResponse response = coffeeService.getForm();
-		return ResponseEntity.ok().body(response);
-	}
-
-	@PostMapping("/create")
-	@SecurityRequiredOperation
-	public ResponseEntity<GlobalResponse> createCoffeeTime(
-		@Valid @ModelAttribute CoffeeCreateRequest request,
-		@RequestParam(value = "images", required = false) List<MultipartFile> images) {
-		final User currentUser = userService.getCurrentUser();
-		coffeeService.createCoffee(currentUser, request, images);
-		return ResponseEntity.ok().body(new GlobalResponse(EntryPayloadCode.SUCCESS_REQUEST));
-	}
+//	@PatchMapping("/${coffeeId}")
+//	@SecurityRequiredOperation
+//	public ResponseEntity<GlobalResponse> updateCoffee(
+//		@RequestParam(value = "coffeeId") Long coffeeId,
+//		@Valid @ModelAttribute CoffeeCreateRequest request,
+//		@RequestParam(value = "images", required = false) List<MultipartFile> images) {
+//		final User currentUser = userService.getCurrentUser();
+//		coffeeService.updateCoffee(currentUser, coffeeId, request, images);
+//		return ResponseEntity.ok().body(new GlobalResponse(EntryPayloadCode.SUCCESS_REQUEST));
+//	}
 }

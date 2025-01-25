@@ -4,24 +4,21 @@ import coffeetime.domain.User;
 import coffeetime.exception.CoffeeTimeException;
 import coffeetime.exception.EntryPayloadCode;
 import coffeetime.exception.JwtValidationException;
+import coffeetime.repository.RefreshTokenRepository;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import javax.crypto.spec.SecretKeySpec;
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 @Getter
 public class JwtUtility {
-
-	private static final String SECRET_KEY_ALGORITHM = "HmacSHA512";
 
 	@Value("${token.jwt.issuer}")
 	private String tokenIssuer;
@@ -35,49 +32,81 @@ public class JwtUtility {
 	@Value("${token.jwt.refresh-token-expiration}")
 	private Integer refreshTokenExpiration;
 
+	@Autowired
+	private RefreshTokenRepository refreshTokenRepository;
 
-	public String generateAccessToken(User user) {
+	public JwtUtility() {}
+
+	public String generateAccessToken(User user, Integer tokenVersion) {
 		if (user.getId() == null || user.getUsername() == null) {
 			throw new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_USER);
 		}
 		String subject = String.format("%s, %s", user.getId(), user.getUsername());
-		return generateToken(subject, accessTokenExpiration, user.getRole().name());
+		return generateToken(subject, accessTokenExpiration, user.getRole().name(), tokenVersion);
 	}
 
-	public String generateRefreshToken() {
-		return generateToken("", refreshTokenExpiration, "");
-	}
-
-	private String generateToken(String subject, Integer expirationMinutes, String role) {
-		long expirationTimeInMillis = expirationMinutes * 6000 + System.currentTimeMillis();
-		return Jwts.builder()
+	private String generateToken(String subject, Integer expirationMinutes, String role,
+		Integer version) {
+		long expirationTimeInMillis = System.currentTimeMillis() + expirationMinutes * 60 * 1000;
+		String token = Jwts.builder()
 			.subject(subject)
 			.issuer(tokenIssuer)
 			.issuedAt(new Date())
 			.expiration(new Date(expirationTimeInMillis))
 			.claim("role", role)
+			.claim("version", version)
 			.signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)),
 				Jwts.SIG.HS512)
 			.compact();
+		return token;
+	}
+
+	public String generateRefreshToken() {
+		return generateToken("", refreshTokenExpiration, "", 0);
 	}
 
 	public Claims validateAccessToken(String token) throws JwtValidationException {
 		try {
 			SecretKeySpec keySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8),
-				SECRET_KEY_ALGORITHM);
-			return Jwts.parser()
+				"HmacSHA512");
+			Claims claims = Jwts.parser()
 				.verifyWith(keySpec)
 				.build()
 				.parseSignedClaims(token)
 				.getPayload();
-		} catch (ExpiredJwtException e) {
-			throw new JwtValidationException("Access token expired", e);
-		} catch (IllegalArgumentException e) {
-			throw new JwtValidationException("Access token is illegal", e);
-		} catch (MalformedJwtException e) {
-			throw new JwtValidationException("Access token is not well formed", e);
-		} catch (UnsupportedJwtException e) {
-			throw new JwtValidationException("Access token is not supported", e);
+
+			String subject = claims.getSubject();
+			if (subject == null || !subject.contains(", ")) {
+				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
+			}
+
+			String[] parts = subject.split(", ");
+			if (parts.length != 2) {
+				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
+			}
+
+			Long userId;
+			try {
+				userId = Long.parseLong(parts[0]);
+			} catch (NumberFormatException e) {
+				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
+			}
+
+			Integer tokenVersion = claims.get("version", Integer.class);
+			if (tokenVersion == null) {
+				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
+			}
+
+			var latestToken = refreshTokenRepository.findLatestByUser(User.builder().id(userId).build());
+			if (latestToken.isEmpty() || !latestToken.get().getTokenVersion().equals(tokenVersion)) {
+				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
+			}
+
+			return claims;
+		} catch (CoffeeTimeException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
 		}
 	}
 

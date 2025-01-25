@@ -66,9 +66,6 @@ public class SecurityConfig {
 						"/swagger-resources/**")
 					.permitAll()
 					.requestMatchers("/api/v1/auth/**", "/api/health-check").permitAll()
-					.requestMatchers("api/v1/coffee/**", "api/v1/my").authenticated()
-					.requestMatchers("api/v1/my/nickname").hasAnyAuthority(RoleType.GENERAL_USER.name(),
-						RoleType.SPECIAL_USER.name())
 					.anyRequest().authenticated())
 			.csrf(csrf -> csrf.disable())
 			.exceptionHandling(exception -> exception.authenticationEntryPoint(

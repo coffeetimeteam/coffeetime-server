@@ -31,7 +31,7 @@ public class JwtUtilityTests {
 			@Override
 			public void execute() throws Throwable {
 				User user = null;
-				jwtUtility.generateAccessToken(user);
+				jwtUtility.generateAccessToken(user, 0);
 			}
 		});
 	}
@@ -40,7 +40,7 @@ public class JwtUtilityTests {
 	public void testGenerateSuccess() {
 		User user = new User(1L, LoginType.EMAIL, "test@email.com",
 			"화려한 아메리카노", "12341234", RoleType.GENERAL_USER);
-		String token = jwtUtility.generateAccessToken(user);
+		String token = jwtUtility.generateAccessToken(user, 0);
 		assertNotNull(token);
 
 		System.out.println(token);
@@ -58,7 +58,7 @@ public class JwtUtilityTests {
 		User user = new User(1L, LoginType.EMAIL, "test@email.com",
 			"화려한 아메리카노",
 			"12341234", RoleType.GENERAL_USER);
-		String token = jwtUtility.generateAccessToken(user);
+		String token = jwtUtility.generateAccessToken(user, 0);
 		assertNotNull(token);
 		assertDoesNotThrow(() -> {
 			jwtUtility.validateAccessToken(token);

@@ -17,7 +17,6 @@ import coffeetime.repository.CoffeeRepository;
 import coffeetime.repository.ImageRepository;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -38,6 +37,31 @@ public class CoffeeService {
 	private final ImageRepository imageRepository;
 	private final ImageService imageService;
 
+	@Transactional
+	public void createCoffee(final User user, final CoffeeCreateRequest request,
+		final List<MultipartFile> images) {
+		final Coffee saveCoffee = Coffee.createCoffee(
+			user,
+			request.rememberDate(),
+			request.rememberTime(),
+			LocationType.fromDisplayName(request.location()),
+			CoffeeType.fromDisplayName(request.coffee()),
+			SizeType.fromDisplayName(request.size()),
+			TasteType.fromDisplayName(request.taste()),
+			PriceType.fromDisplayName(request.price()),
+			request.coffeeScore(),
+			null);
+		final Coffee coffee = coffeeRepository.save(saveCoffee);
+		if (coffee.getId() == null) {
+			throw new CoffeeTimeException(EntryPayloadCode.FAIL_SAVE_COFFEE);
+		}
+		if (images != null && !images.isEmpty()) {
+			final List<String> uploadedImages = imageService.uploadImages(images);
+			imageRepository.saveAll(Image.saveImage(coffee, uploadedImages));
+		}
+	}
+
+	@Transactional(readOnly = true)
 	public CoffeeFormResponse getForm() {
 		final List<String> locationList =
 			Arrays.stream(LocationType.values())
@@ -63,30 +87,6 @@ public class CoffeeService {
 			.priceType(priceList)
 			.coffeeScoreType(coffeeScoreList)
 			.build();
-	}
-
-	@Transactional
-	public void createCoffee(final User user, final CoffeeCreateRequest request,
-		final List<MultipartFile> images) {
-		final Coffee saveCoffee = Coffee.createCoffee(
-			user,
-			request.rememberDate(),
-			request.rememberTime(),
-			LocationType.fromDisplayName(request.location()),
-			CoffeeType.fromDisplayName(request.coffee()),
-			SizeType.fromDisplayName(request.size()),
-			TasteType.fromDisplayName(request.taste()),
-			PriceType.fromDisplayName(request.price()),
-			request.coffeeScore(),
-			null);
-		final Coffee coffee = coffeeRepository.save(saveCoffee);
-		if (coffee.getId() == null) {
-			throw new CoffeeTimeException(EntryPayloadCode.FAIL_SAVE_COFFEE);
-		}
-		if (images != null && !images.isEmpty()) {
-			final List<String> uploadedImages = imageService.uploadImages(images);
-			imageRepository.saveAll(Image.saveImage(coffee, uploadedImages));
-		}
 	}
 
 	@Transactional(readOnly = true)
@@ -137,25 +137,25 @@ public class CoffeeService {
 			.toList();
 	}
 
-	private Map<String, Object> createCoffeeDetails(Coffee coffee) {
-		Map<String, Object> details = new HashMap<>();
-		details.put("rememberDate", coffee.getRememberDate().toString());
-		details.put("rememberTime", coffee.getRememberTime().toString());
-		details.put("locationType", coffee.getLocationType());
-		details.put("coffeeType", coffee.getCoffeeType());
-		details.put("sizeType", coffee.getSizeType());
-		details.put("tasteType", coffee.getTasteType());
-		details.put("priceType", coffee.getPriceType());
-		details.put("coffeeScore", coffee.getCoffeeScore());
-
-		List<String> imageUrls = coffee.getImages().stream()
-			.map(Image::getUrl)
-			.map(key -> serverUrl + "/api/v1/images/" + key)
-			.collect(Collectors.toList());
-		details.put("imageKeys", imageUrls);
-
-		return details;
-	}
+//	private Map<String, Object> createCoffeeDetails(Coffee coffee) {
+//		Map<String, Object> details = new HashMap<>();
+//		details.put("rememberDate", coffee.getRememberDate().toString());
+//		details.put("rememberTime", coffee.getRememberTime().toString());
+//		details.put("locationType", coffee.getLocationType());
+//		details.put("coffeeType", coffee.getCoffeeType());
+//		details.put("sizeType", coffee.getSizeType());
+//		details.put("tasteType", coffee.getTasteType());
+//		details.put("priceType", coffee.getPriceType());
+//		details.put("coffeeScore", coffee.getCoffeeScore());
+//
+//		List<String> imageUrls = coffee.getImages().stream()
+//			.map(Image::getUrl)
+//			.map(key -> serverUrl + "/api/v1/images/" + key)
+//			.collect(Collectors.toList());
+//		details.put("imageKeys", imageUrls);
+//
+//		return details;
+//	}
 
 
 }
