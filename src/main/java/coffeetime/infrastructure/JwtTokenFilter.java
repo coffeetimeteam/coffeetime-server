@@ -1,9 +1,13 @@
 package coffeetime.infrastructure;
 
 import coffeetime.controller.ServerAlertController;
+import coffeetime.domain.RefreshToken;
 import coffeetime.domain.User;
 import coffeetime.domain.type.RoleType;
+import coffeetime.exception.CoffeeTimeException;
+import coffeetime.exception.EntryPayloadCode;
 import coffeetime.exception.JwtValidationException;
+import coffeetime.repository.RefreshTokenRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -11,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,21 +33,22 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 @Slf4j
 public class JwtTokenFilter extends OncePerRequestFilter {
 
-
 	private final JwtUtility jwtUtility;
 	private final HandlerExceptionResolver handlerExceptionResolver;
 	private final ServerAlertController serverAlertController;
+	private final RefreshTokenRepository refreshTokenRepository;
 
 	private static final String BEARER_PREFIX = "Bearer ";
 	private static final List<String> TOKEN_ENDPOINTS = Arrays.asList("/logout", "/token");
 
-
 	public JwtTokenFilter(JwtUtility jwtUtility,
 		@Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver,
-		ServerAlertController serverAlertController) {
+		ServerAlertController serverAlertController,
+		RefreshTokenRepository refreshTokenRepository) {
 		this.jwtUtility = jwtUtility;
 		this.handlerExceptionResolver = handlerExceptionResolver;
 		this.serverAlertController = serverAlertController;
+		this.refreshTokenRepository = refreshTokenRepository;
 	}
 
 	@Override
@@ -73,7 +79,23 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 		throws ServletException, IOException {
 		try {
 			Claims claims = jwtUtility.validateAccessToken(token);
+			if (isAccessTokenExpired(claims)) {
+				throw new CoffeeTimeException(EntryPayloadCode.EXPIRED_TOKEN);
+			}
+
 			UserDetails userDetails = createUserDetailsFromClaims(claims);
+			CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
+
+			Integer tokenVersion = claims.get("version", Integer.class);
+			RefreshToken latestRefreshToken = refreshTokenRepository.findLatestByUser(
+					customUserDetails.user())
+				.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN));
+
+			if (tokenVersion == null || !tokenVersion.equals(
+				latestRefreshToken.getTokenVersion())) {
+				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
+			}
+
 			setAuthenticationContext(userDetails, request);
 			filterChain.doFilter(request, response);
 		} catch (JwtValidationException e) {
@@ -101,15 +123,16 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 	}
 
 	private void setAuthenticationContext(UserDetails userDetails, HttpServletRequest request) {
-		var authentication = createAuthentication(userDetails, request);
+		final Authentication authentication = createAuthentication(userDetails, request);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		log.debug("Authentication context set for user: {}", userDetails.getUsername());
 	}
 
 	private Authentication createAuthentication(UserDetails userDetails,
 		HttpServletRequest request) {
-		var authentication = new UsernamePasswordAuthenticationToken(
-			userDetails, null, userDetails.getAuthorities());
+		final UsernamePasswordAuthenticationToken authentication =
+			new UsernamePasswordAuthenticationToken(
+				userDetails, null, userDetails.getAuthorities());
 		authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 		return authentication;
 	}
@@ -121,5 +144,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 		}
 		log.debug("Bearer token extraction failed");
 		return null;
+	}
+
+	private boolean isAccessTokenExpired(Claims claims) {
+		Date expirationDate = claims.getExpiration();
+		return expirationDate.before(new Date());
 	}
 }

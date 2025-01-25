@@ -114,7 +114,7 @@ public class Coffee {
 		final Integer coffeeScore,
 		final List<Image> images
 	) {
-		return builder()
+		return Coffee.builder()
 			.user(user)
 			.rememberDate(rememberDate)
 			.rememberTime(rememberTime)

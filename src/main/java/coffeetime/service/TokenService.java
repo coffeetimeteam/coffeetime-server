@@ -29,31 +29,68 @@ public class TokenService {
 	private final JwtUtility jwtUtility;
 
 	public TokensResponse generateTokens(User user) {
-		final String accessToken = jwtUtility.generateAccessToken(user);
+		final RefreshToken latestToken = refreshTokenRepository.findLatestByUser(user)
+			.orElse(null);
+		final int newVersion = (latestToken != null) ? latestToken.getTokenVersion() + 1 : 0;
+		final String accessToken = jwtUtility.generateAccessToken(user, newVersion);
 		final String refreshToken = jwtUtility.generateRefreshToken();
 		final long refreshTokenExpirationMills =
 			System.currentTimeMillis() + refreshTokenExpiration * 60000L;
-		final RefreshToken newRefreshToken = new RefreshToken(
+		final RefreshToken newRefreshToken = RefreshToken.createRefreshToken(
 			user,
 			refreshToken,
-			new Date(refreshTokenExpirationMills));
+			new Date(refreshTokenExpirationMills),
+			newVersion);
 		refreshTokenRepository.save(newRefreshToken);
 		return new TokensResponse(accessToken, refreshToken);
 	}
 
-	public TokensResponse renewalTokens(String bearerToken) {
+	private RefreshToken getValidRefreshToken(String bearerToken) {
 		if (bearerToken == null) {
 			throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
 		}
 		final String token = bearerToken.replace("Bearer ", "");
-		final Date currentDate = new Date();
-		final RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
+		return refreshTokenRepository.findByToken(token)
 			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.FAIL_RENEWAL_TOKE));
-		validateExpiration(refreshToken, currentDate);
-		refreshTokenRepository.delete(refreshToken);
-		return generateTokens(refreshToken.getUser());
 	}
 
+	private RefreshToken updateTokenVersion(RefreshToken refreshToken) {
+		refreshToken.incrementTokenVersion();
+		return refreshTokenRepository.save(refreshToken);
+	}
+
+	private RefreshToken createNewRefreshToken(User user, String token, int version) {
+		final long expirationMills = System.currentTimeMillis() + refreshTokenExpiration * 60000L;
+		return RefreshToken.createRefreshToken(
+			user,
+			token,
+			new Date(expirationMills),
+			version
+		);
+	}
+
+	public TokensResponse renewalTokens(String bearerToken) {
+		final RefreshToken oldRefreshToken = getValidRefreshToken(bearerToken);
+		validateExpiration(oldRefreshToken, new Date());
+
+		final RefreshToken updatedRefreshToken = updateTokenVersion(oldRefreshToken);
+		final String accessToken = jwtUtility.generateAccessToken(
+			updatedRefreshToken.getUser(),
+			updatedRefreshToken.getTokenVersion()
+		);
+
+		final String newRefreshTokenValue = jwtUtility.generateRefreshToken();
+		final RefreshToken newRefreshToken = createNewRefreshToken(
+			updatedRefreshToken.getUser(),
+			newRefreshTokenValue,
+			updatedRefreshToken.getTokenVersion()
+		);
+
+		refreshTokenRepository.delete(updatedRefreshToken);
+		refreshTokenRepository.save(newRefreshToken);
+
+		return new TokensResponse(accessToken, newRefreshTokenValue);
+	}
 
 	private void validateExpiration(RefreshToken token, Date currentDate) {
 		if (token.getExpiredAt().before(currentDate)) {

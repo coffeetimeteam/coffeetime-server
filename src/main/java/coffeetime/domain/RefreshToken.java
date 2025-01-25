@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.Date;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -33,15 +34,35 @@ public class RefreshToken {
 	@Column(nullable = false)
 	private Date expiredAt;
 
-	public RefreshToken(final Integer id, final User user, final String token,
-		final Date expiredAt) {
+	@Column(nullable = false)
+	private Integer tokenVersion = 0;
+
+	@Builder
+	private RefreshToken(final Integer id, final User user, final String token,
+		final Date expiredAt, final Integer tokenVersion) {
 		this.id = id;
 		this.user = user;
 		this.token = token;
 		this.expiredAt = expiredAt;
+		this.tokenVersion = tokenVersion;
 	}
 
-	public RefreshToken(final User userId, final String token, final Date expiredAt) {
-		this(null, userId, token, expiredAt);
+	public static RefreshToken createRefreshToken(final User userId, final String token,
+		final Date expiredAt, final Integer tokenVersion) {
+		return RefreshToken.builder()
+			.user(userId)
+			.token(token)
+			.expiredAt(expiredAt)
+			.tokenVersion(tokenVersion)
+			.build();
+	}
+
+	public static RefreshToken createRefreshToken(final User userId, final String token,
+		final Date expiredAt) {
+		return createRefreshToken(userId, token, expiredAt, 0);
+	}
+
+	public void incrementTokenVersion() {
+		this.tokenVersion += 1;
 	}
 }

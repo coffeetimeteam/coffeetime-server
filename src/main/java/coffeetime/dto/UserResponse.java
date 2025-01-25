@@ -6,7 +6,7 @@ public record UserResponse(
 	Long id,
 	String username,
 	String nickname,
-	RoleType roleType
+	RoleType role
 ) {
 
 }
