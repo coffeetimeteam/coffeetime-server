@@ -17,7 +17,9 @@ import coffeetime.repository.CoffeeRepository;
 import coffeetime.repository.ImageRepository;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -104,20 +106,56 @@ public class CoffeeService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<CoffeeResponse> findCoffeesByMonth(final User user, final Integer year,
+	public List<Map<String, Object>> findCoffeesByMonth(final User user, final Integer year,
 		final Integer month) {
 		final LocalDate targetDate = (year == null || month == null) ? LocalDate.now() :
 			LocalDate.of(year, month, 1);
 		final List<Coffee> coffees = coffeeRepository.findCoffeesByMonth(user, targetDate.getYear(),
 			targetDate.getMonthValue());
-		return coffees.stream()
-			.map(coffee -> {
-				List<String> imageUrls = coffee.getImages().stream()
-					.map(Image::getUrl)
-					.map(key -> serverUrl + "/api/v1/images/" + key)
-					.collect(Collectors.toList());
-				return CoffeeResponse.of(coffee, imageUrls);
-			})
-			.collect(Collectors.toList());
+		final List<CoffeeResponse> coffeeResponses = CoffeeResponse.groupByMonth(coffees,
+			serverUrl);
+		return coffeeResponses.stream()
+			.collect(Collectors.groupingBy(
+				coffee -> coffee.rememberDate().toString(),
+				Collectors.mapping(coffee -> Map.of(
+					"rememberDate", coffee.rememberDate().toString(),
+					"rememberTime", coffee.rememberTime().toString(),
+					"locationType", coffee.locationType(),
+					"coffeeType", coffee.coffeeType(),
+					"sizeType", coffee.sizeType(),
+					"tasteType", coffee.tasteType(),
+					"priceType", coffee.priceType(),
+					"coffeeScore", coffee.coffeeScore(),
+					"imageKeys", coffee.imageKeys()
+				), Collectors.toList())
+			))
+			.entrySet().stream()
+			.map(entry -> Map.of(
+				"date", entry.getKey(),
+				"items", entry.getValue()
+			))
+			.toList();
 	}
+
+	private Map<String, Object> createCoffeeDetails(Coffee coffee) {
+		Map<String, Object> details = new HashMap<>();
+		details.put("rememberDate", coffee.getRememberDate().toString());
+		details.put("rememberTime", coffee.getRememberTime().toString());
+		details.put("locationType", coffee.getLocationType());
+		details.put("coffeeType", coffee.getCoffeeType());
+		details.put("sizeType", coffee.getSizeType());
+		details.put("tasteType", coffee.getTasteType());
+		details.put("priceType", coffee.getPriceType());
+		details.put("coffeeScore", coffee.getCoffeeScore());
+
+		List<String> imageUrls = coffee.getImages().stream()
+			.map(Image::getUrl)
+			.map(key -> serverUrl + "/api/v1/images/" + key)
+			.collect(Collectors.toList());
+		details.put("imageKeys", imageUrls);
+
+		return details;
+	}
+
+
 }

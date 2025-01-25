@@ -12,6 +12,7 @@ import coffeetime.service.UserService;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -33,12 +34,13 @@ public class CoffeeController {
 
 	@GetMapping("/calendar")
 	@SecurityRequiredOperation
-	public ResponseEntity<List<CoffeeResponse>> getCoffeesByMonth(
-		@RequestParam(required = false) final Integer year, final Integer month
+	public ResponseEntity<List<Map<String, Object>>> getCoffeesByMonth(
+		@RequestParam(required = false) final Integer year,
+		@RequestParam(required = false) final Integer month
 	) {
 		final User currentUser = userService.getCurrentUser();
-		final List<CoffeeResponse> response = coffeeService.findCoffeesByMonth(currentUser, year,
-			month);
+		final List<Map<String, Object>> response = coffeeService.findCoffeesByMonth(currentUser,
+			year, month);
 		return ResponseEntity.ok().body(response);
 	}
 
