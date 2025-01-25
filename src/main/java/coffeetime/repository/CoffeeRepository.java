@@ -18,12 +18,12 @@ public interface CoffeeRepository extends JpaRepository<Coffee, Long> {
 		""")
 	List<Coffee> findCoffeesByDate(@Param("user") User user, @Param("date") LocalDate date);
 
-	// Query to find coffees by a specific user, year, and month
 	@Query("""
 		SELECT coffee FROM Coffee coffee
 		WHERE coffee.user = :user
 		AND EXTRACT(YEAR FROM coffee.rememberDate) = :year
 		AND EXTRACT(MONTH FROM coffee.rememberDate) = :month
+		ORDER BY coffee.rememberDate, coffee.rememberTime
 		""")
 	List<Coffee> findCoffeesByMonth(@Param("user") User user, @Param("year") int year,
 		@Param("month") int month);

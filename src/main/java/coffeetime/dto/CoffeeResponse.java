@@ -4,6 +4,7 @@ import coffeetime.domain.Coffee;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public record CoffeeResponse(
 	Long id,
@@ -32,4 +33,13 @@ public record CoffeeResponse(
 			imageKeys
 		);
 	}
-} 
+
+
+	public static List<CoffeeResponse> groupByMonth(List<Coffee> coffees, String serverUrl) {
+		return coffees.stream()
+			.map(coffee -> of(coffee, coffee.getImages().stream()
+				.map(image -> serverUrl + "/api/v1/images/" + image.getUrl())
+				.collect(Collectors.toList())))
+			.collect(Collectors.toList());
+	}
+}
