@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 @EnableMethodSecurity
 public class UserService {
@@ -27,6 +26,7 @@ public class UserService {
 	private final DefaultNickname defaultNickname;
 	private final CustomUserDetailsService customUserDetailsService;
 
+	@Transactional(timeout = 10)
 	public GlobalResponse createUser(final UserCreateRequest request) {
 		if (userRepository.existsByUsername(request.getUsername())) {
 			throw new CoffeeTimeException(EntryPayloadCode.DUPLICATED_USER);
@@ -46,6 +46,7 @@ public class UserService {
 		return new GlobalResponse(EntryPayloadCode.SUCCESS_REQUEST);
 	}
 
+	@Transactional(readOnly = true)
 	public User getCurrentUser() {
 		final CustomUserDetails customUserDetails = customUserDetailsService.getCurrentUserDetails();
 		final String username = customUserDetails.getUsername();

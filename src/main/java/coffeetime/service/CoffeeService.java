@@ -37,7 +37,7 @@ public class CoffeeService {
 	private final ImageRepository imageRepository;
 	private final ImageService imageService;
 
-	@Transactional
+	@Transactional(timeout = 10)
 	public void createCoffee(final User user, final CoffeeCreateRequest request,
 		final List<MultipartFile> images) {
 		final Coffee saveCoffee = Coffee.createCoffee(
