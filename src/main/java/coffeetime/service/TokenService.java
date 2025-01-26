@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class TokenService {
 
@@ -28,6 +27,7 @@ public class TokenService {
 	private final RefreshTokenRepository refreshTokenRepository;
 	private final JwtUtility jwtUtility;
 
+	@Transactional
 	public TokensResponse generateTokens(User user) {
 		final RefreshToken latestToken = refreshTokenRepository.findLatestByUser(user)
 			.orElse(null);
@@ -69,6 +69,7 @@ public class TokenService {
 		);
 	}
 
+	@Transactional
 	public TokensResponse renewalTokens(String bearerToken) {
 		final RefreshToken oldRefreshToken = getValidRefreshToken(bearerToken);
 		validateExpiration(oldRefreshToken, new Date());
@@ -98,6 +99,7 @@ public class TokenService {
 		}
 	}
 
+	@Transactional
 	public void deleteRefreshToken(final String bearerToken) {
 		if (bearerToken == null) {
 			throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);

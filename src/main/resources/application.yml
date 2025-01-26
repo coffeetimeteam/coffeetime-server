@@ -26,10 +26,15 @@ spring:
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
+      minimum-idle: 2
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
       leak-detection-threshold: 2000
+      validation-timeout: 5000
+      pool-name: CoffeeTimeHikariPool
+      data-source-properties:
+        applicationName: CoffeeTimeHikariPool
   jpa:
     show-sql: true
     hibernate:

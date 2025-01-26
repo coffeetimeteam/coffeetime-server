@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -24,6 +25,7 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ImageService {
 
 	@Value("${spring.cloud.aws.s3.bucket}")
@@ -74,6 +76,7 @@ public class ImageService {
 		s3Client.deleteObject(deleteObjectRequest);
 	}
 
+	@Transactional(readOnly = true)
 	public String getPresignedUrl(String objectKey) {
 		try {
 			GetObjectRequest getObjectRequest = GetObjectRequest.builder()
@@ -94,6 +97,7 @@ public class ImageService {
 		}
 	}
 
+	@Transactional(readOnly = true)
 	public byte[] getImageBytes(String objectKey) {
 		try {
 			GetObjectRequest getObjectRequest = GetObjectRequest.builder()
