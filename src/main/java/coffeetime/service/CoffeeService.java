@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,9 +28,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @RequiredArgsConstructor
 public class CoffeeService {
-
-	@Value("${spring.server.url}")
-	private String serverUrl;
 
 	private final CoffeeRepository coffeeRepository;
 	private final ImageRepository imageRepository;
@@ -98,7 +94,6 @@ public class CoffeeService {
 			.map(coffee -> {
 				List<String> imageUrls = coffee.getImages().stream()
 					.map(Image::getUrl)
-					.map(key -> serverUrl + "/api/v1/images/" + key)
 					.collect(Collectors.toList());
 				return CoffeeResponse.of(coffee, imageUrls);
 			})
@@ -112,8 +107,7 @@ public class CoffeeService {
 			LocalDate.of(year, month, 1);
 		final List<Coffee> coffees = coffeeRepository.findCoffeesByMonth(user, targetDate.getYear(),
 			targetDate.getMonthValue());
-		final List<CoffeeResponse> coffeeResponses = CoffeeResponse.groupByMonth(coffees,
-			serverUrl);
+		final List<CoffeeResponse> coffeeResponses = CoffeeResponse.groupByMonth(coffees);
 		return coffeeResponses.stream()
 			.collect(Collectors.groupingBy(
 				coffee -> coffee.rememberDate().toString(),
@@ -126,7 +120,7 @@ public class CoffeeService {
 					"tasteType", coffee.tasteType(),
 					"priceType", coffee.priceType(),
 					"coffeeScore", coffee.coffeeScore(),
-					"imageKeys", coffee.imageKeys()
+					"imageKeys", coffee.imageUrls()
 				), Collectors.toList())
 			))
 			.entrySet().stream()

@@ -15,10 +15,6 @@ spring:
       credentials:
         accessKey: ${S3_ACCESS_KEY}
         secretKey: ${S3_SECRET_KEY}
-      region:
-        static: ap-northeast-2
-  server:
-    url: ${SERVER_URL}
   datasource:
     url: ${DB_HOST}
     username: ${DB_USERNAME}
