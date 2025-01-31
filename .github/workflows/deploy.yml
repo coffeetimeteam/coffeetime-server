@@ -2,10 +2,7 @@ name: Docker Build and Deploy
 
 on:
   push:
-    branches: [ feat-31 ]
-    paths:
-      - "./**"
-      - ".github/workflows/deploy.yml"
+    branches: [ "develop", "feat-31" ]
 
 jobs:
   docker-buildx-and-push:
@@ -38,7 +35,8 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: bootJar with gradle
-        run: ./gradlew clean bootJar -x test
+        run: |
+          ./gradlew clean bootJar -x test | base64
 
       - name: login to docker hub
         uses: docker/login-action@v2
@@ -57,7 +55,9 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/coffeetime:latest
-          build-args: --no-cache
+          build-args: |
+            --no-cache
+            ENV_VARS=${{ secrets.ENV_VARS }}
 
   docker-pull-and-run:
     runs-on: [ self-hosted, ec2 ]
