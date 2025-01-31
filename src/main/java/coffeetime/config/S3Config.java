@@ -20,15 +20,11 @@ public class S3Config {
 	@Value("${spring.cloud.aws.credentials.secretKey}")
 	private String secretKey;
 
-	@Value("${spring.cloud.aws.region.static}")
-	private String region;
-
 	@Bean
 	public S3Client s3Client() {
 		AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(accessKey, secretKey);
-
 		return S3Client.builder()
-			.region(Region.of(region))
+			.region(Region.AP_NORTHEAST_2)
 			.credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
 			.build();
 	}
@@ -38,7 +34,7 @@ public class S3Config {
 		AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(accessKey, secretKey);
 
 		return S3Presigner.builder()
-			.region(Region.of(region))
+			.region(Region.AP_NORTHEAST_2)
 			.credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
 			.build();
 	}

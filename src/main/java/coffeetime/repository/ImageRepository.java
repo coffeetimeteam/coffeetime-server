@@ -1,6 +1,7 @@
 package coffeetime.repository;
 
 import coffeetime.domain.Image;
+import coffeetime.domain.User;
 import feign.Param;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ImageRepository extends JpaRepository<Image, Long> {
+
+	List<Image> findByCoffee_User(User user);
 
 	@Modifying
 	@Query("""
