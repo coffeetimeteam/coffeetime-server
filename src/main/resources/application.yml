@@ -39,6 +39,12 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 20MB
+      resolve-lazily: true
+
 
 logging:
   discord:
