@@ -35,7 +35,7 @@ public class CoffeeRepositoryTests {
 	void setUp() {
 		testUser = userRepository.save(new User("test@email.com", "password"));
 
-		testCoffee = Coffee.createCoffee(
+		testCoffee = Coffee.create(
 			testUser,
 			LocalDate.now(),
 			LocalTime.now(),

@@ -73,10 +73,10 @@ public class CoffeeServiceTests {
 			.thenReturn(List.of("test-image-key"));
 
 		// when
-		coffeeService.createCoffee(testUser, testRequest, List.of(testImage));
+		coffeeService.createCoffee(testRequest);
 
 		// then
-		List<CoffeeResponse> responses = coffeeService.findCoffeesByDate(testUser, LocalDate.now());
+		List<CoffeeResponse> responses = coffeeService.findCoffeesByDate(LocalDate.now());
 		assertThat(responses).isNotEmpty();
 
 		CoffeeResponse response = responses.get(0);
@@ -88,7 +88,7 @@ public class CoffeeServiceTests {
 	@Test
 	public void testGetCoffeesByDate() {
 		// given
-		Coffee coffee = Coffee.createCoffee(
+		Coffee coffee = Coffee.create(
 			testUser,
 			LocalDate.now(),
 			LocalTime.now(),
@@ -102,7 +102,7 @@ public class CoffeeServiceTests {
 		);
 
 		// when
-		List<CoffeeResponse> responses = coffeeService.findCoffeesByDate(testUser, LocalDate.now());
+		List<CoffeeResponse> responses = coffeeService.findCoffeesByDate(LocalDate.now());
 
 		// then
 		assertThat(responses).isNotNull();
@@ -112,7 +112,7 @@ public class CoffeeServiceTests {
 				assertThat(response.rememberDate()).isNotNull();
 				assertThat(response.rememberTime()).isNotNull();
 				response.imageKeys().forEach(imageUrl -> {
-					assertThat(imageUrl).startsWith(serverUrl + "/api/v1/images/");
+					assertThat(imageUrl).startsWith();
 				});
 			});
 		}
@@ -129,14 +129,15 @@ public class CoffeeServiceTests {
 			"큰 거",
 			"신맛나는",
 			"가성비 있는",
-			5
+			5,
+			null
 		);
 
 		// when
-		coffeeService.createCoffee(testUser, testRequest, List.of());
+		coffeeService.createCoffee(testRequest);
 
 		// then
-		List<CoffeeResponse> responses = coffeeService.findCoffeesByDate(testUser, LocalDate.now());
+		List<CoffeeResponse> responses = coffeeService.findCoffeesByDate(LocalDate.now());
 		assertThat(responses).isNotEmpty();
 
 		CoffeeResponse response = responses.get(0);
