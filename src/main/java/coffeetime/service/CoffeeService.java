@@ -172,4 +172,17 @@ public class CoffeeService {
 		imageService.deleteImages(imageUrls);
 		imageRepository.deleteByUrls(imageUrls);
 	}
+
+	@Transactional
+	public void deleteCoffee(final Long coffeeId) {
+		final User currentUser = userService.getCurrentUser();
+		final Coffee coffee = coffeeRepository.findByIdAndUser(coffeeId, currentUser)
+			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_COFFEE));
+		try {
+			coffeeRepository.deleteById(coffee.getId());
+			imageRepository.deleteByCoffee(coffee);
+		} catch (Exception e) {
+			throw new CoffeeTimeException(EntryPayloadCode.FAIL_IMAGE_DELETE);
+		}
+	}
 }

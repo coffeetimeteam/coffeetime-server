@@ -25,7 +25,6 @@ public enum EntryPayloadCode {
 	FAIL_RENEWAL_TOKE(HttpStatus.UNAUTHORIZED, "토큰 갱신을 실패했습니다."),
 	FAIL_LOGOUT(HttpStatus.UNAUTHORIZED, "로그아웃에 실패했습니다."),
 	FAIL_VALIDATE_TOKE(HttpStatus.UNAUTHORIZED, "토큰 유효성 검사 중 오류가 발생했습니다."),
-	FAIL_IMAGE_DELETE(HttpStatus.FORBIDDEN, "이미지 삭제에 실패했습니다."),
 	NOT_ENOUGH_PERMISSION(HttpStatus.UNAUTHORIZED, "제한된 권한입니다."),
 	BAD_CREDENTIAL(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."),
 
@@ -33,7 +32,8 @@ public enum EntryPayloadCode {
 
 	NOT_FOUND_AUTH(HttpStatus.INTERNAL_SERVER_ERROR, "시큐리티 인증 정보가 없습니다"),
 	FAIL_IMAGE_UPLOAD(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드에 실패했습니다."),
-	FAIL_SAVE_COFFEE(HttpStatus.INTERNAL_SERVER_ERROR, "커피 기록 저장에 실패했습니다.");
+	FAIL_SAVE_COFFEE(HttpStatus.INTERNAL_SERVER_ERROR, "커피 기록 저장에 실패했습니다."),
+	FAIL_IMAGE_DELETE(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 삭제에 실패했습니다.");
 
 	private final HttpStatus code;
 	private final String message;

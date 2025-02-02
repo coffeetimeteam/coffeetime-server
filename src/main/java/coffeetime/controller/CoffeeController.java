@@ -15,6 +15,7 @@ import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -75,6 +76,15 @@ public class CoffeeController {
 		@PathVariable final Long coffeeId,
 		@Valid @ModelAttribute final CoffeeUpdateRequest request) {
 		coffeeService.updateCoffee(coffeeId, request);
+		return ResponseEntity.ok().body(new GlobalResponse(EntryPayloadCode.SUCCESS_REQUEST));
+	}
+
+	@DeleteMapping("/{coffeeId}")
+	@SecurityRequiredOperation
+	public ResponseEntity<GlobalResponse> deleteCoffee(
+		@PathVariable final Long coffeeId
+	) {
+		coffeeService.deleteCoffee(coffeeId);
 		return ResponseEntity.ok().body(new GlobalResponse(EntryPayloadCode.SUCCESS_REQUEST));
 	}
 }
