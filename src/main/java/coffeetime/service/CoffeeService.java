@@ -1,5 +1,7 @@
 package coffeetime.service;
 
+import static java.util.stream.Collectors.toList;
+
 import coffeetime.domain.Coffee;
 import coffeetime.domain.Image;
 import coffeetime.domain.User;
@@ -11,8 +13,10 @@ import coffeetime.domain.type.TasteType;
 import coffeetime.dto.CoffeeCreateRequest;
 import coffeetime.dto.CoffeeFormResponse;
 import coffeetime.dto.CoffeeResponse;
+import coffeetime.dto.CoffeeUpdateRequest;
 import coffeetime.exception.CoffeeTimeException;
 import coffeetime.exception.EntryPayloadCode;
+import coffeetime.exception.GlobalExceptionHandler;
 import coffeetime.repository.CoffeeRepository;
 import coffeetime.repository.ImageRepository;
 import java.time.LocalDate;
@@ -21,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,12 +37,15 @@ public class CoffeeService {
 	private final CoffeeRepository coffeeRepository;
 	private final ImageRepository imageRepository;
 	private final ImageService imageService;
+	private final UserService userService;
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(
+		GlobalExceptionHandler.class);
 
-	@Transactional(timeout = 10)
-	public void createCoffee(final User user, final CoffeeCreateRequest request,
-		final List<MultipartFile> images) {
-		final Coffee saveCoffee = Coffee.createCoffee(
-			user,
+	@Transactional
+	public void createCoffee(final CoffeeCreateRequest request) {
+		final User currentUser = userService.getCurrentUser();
+		final Coffee saveCoffee = Coffee.create(
+			currentUser,
 			request.rememberDate(),
 			request.rememberTime(),
 			LocationType.fromDisplayName(request.location()),
@@ -51,10 +59,7 @@ public class CoffeeService {
 		if (coffee.getId() == null) {
 			throw new CoffeeTimeException(EntryPayloadCode.FAIL_SAVE_COFFEE);
 		}
-		if (images != null && !images.isEmpty()) {
-			final List<String> uploadedImages = imageService.uploadImages(images);
-			imageRepository.saveAll(Image.saveImage(coffee, uploadedImages));
-		}
+		uploadImageFiles(coffee, request.images());
 	}
 
 	@Transactional(readOnly = true)
@@ -86,32 +91,20 @@ public class CoffeeService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<CoffeeResponse> findCoffeesByDate(final User user, final LocalDate date) {
-		final LocalDate targetDate = date != null ? date : LocalDate.now();
-		final List<Coffee> coffees = coffeeRepository.findCoffeesByDate(
-			user, targetDate);
-		return coffees.stream()
-			.map(coffee -> {
-				List<String> imageUrls = coffee.getImages().stream()
-					.map(Image::getUrl)
-					.collect(Collectors.toList());
-				return CoffeeResponse.of(coffee, imageUrls);
-			})
-			.collect(Collectors.toList());
-	}
-
-	@Transactional(readOnly = true)
-	public List<Map<String, Object>> findCoffeesByMonth(final User user, final Integer year,
+	public List<Map<String, Object>> findCoffeesByMonth(final Integer year,
 		final Integer month) {
+		final User currentUser = userService.getCurrentUser();
 		final LocalDate targetDate = (year == null || month == null) ? LocalDate.now() :
 			LocalDate.of(year, month, 1);
-		final List<Coffee> coffees = coffeeRepository.findCoffeesByMonth(user, targetDate.getYear(),
+		final List<Coffee> coffees = coffeeRepository.findCoffeesByMonth(currentUser,
+			targetDate.getYear(),
 			targetDate.getMonthValue());
 		final List<CoffeeResponse> coffeeResponses = CoffeeResponse.groupByMonth(coffees);
 		return coffeeResponses.stream()
 			.collect(Collectors.groupingBy(
 				coffee -> coffee.rememberDate().toString(),
 				Collectors.mapping(coffee -> Map.of(
+					"id", coffee.id(),
 					"rememberDate", coffee.rememberDate().toString(),
 					"rememberTime", coffee.rememberTime().toString(),
 					"locationType", coffee.locationType(),
@@ -120,8 +113,8 @@ public class CoffeeService {
 					"tasteType", coffee.tasteType(),
 					"priceType", coffee.priceType(),
 					"coffeeScore", coffee.coffeeScore(),
-					"imageKeys", coffee.imageUrls()
-				), Collectors.toList())
+					"imageUrls", coffee.imageUrls()
+				), toList())
 			))
 			.entrySet().stream()
 			.map(entry -> Map.of(
@@ -131,25 +124,52 @@ public class CoffeeService {
 			.toList();
 	}
 
-//	private Map<String, Object> createCoffeeDetails(Coffee coffee) {
-//		Map<String, Object> details = new HashMap<>();
-//		details.put("rememberDate", coffee.getRememberDate().toString());
-//		details.put("rememberTime", coffee.getRememberTime().toString());
-//		details.put("locationType", coffee.getLocationType());
-//		details.put("coffeeType", coffee.getCoffeeType());
-//		details.put("sizeType", coffee.getSizeType());
-//		details.put("tasteType", coffee.getTasteType());
-//		details.put("priceType", coffee.getPriceType());
-//		details.put("coffeeScore", coffee.getCoffeeScore());
-//
-//		List<String> imageUrls = coffee.getImages().stream()
-//			.map(Image::getUrl)
-//			.map(key -> serverUrl + "/api/v1/images/" + key)
-//			.collect(Collectors.toList());
-//		details.put("imageKeys", imageUrls);
-//
-//		return details;
-//	}
+	@Transactional(readOnly = true)
+	public List<CoffeeResponse> findCoffeesByDate(final LocalDate date) {
+		final LocalDate targetDate = date != null ? date : LocalDate.now();
+		final User currentUser = userService.getCurrentUser();
+		final List<Coffee> coffees = coffeeRepository.findCoffeesByDate(
+			currentUser, targetDate);
+		return coffees.stream()
+			.map(coffee -> {
+				List<String> imageUrls = coffee.getImages().stream()
+					.map(Image::getUrl)
+					.toList();
+				return CoffeeResponse.of(coffee, imageUrls);
+			})
+			.toList();
+	}
 
+	@Transactional
+	public void updateCoffee(final Long coffeeId, final CoffeeUpdateRequest request) {
+		final User currentUser = userService.getCurrentUser();
+		final Coffee coffee = coffeeRepository.findByIdAndUser(coffeeId, currentUser)
+			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_COFFEE));
+		final List<String> currentImageUrls = coffee.getImages().stream()
+			.map(Image::getUrl)
+			.toList();
+		final List<String> requestImageUrls = request.imageUrls();
+		final List<String> imagesToDelete = currentImageUrls.stream()
+			.filter(url -> !requestImageUrls.contains(url))
+			.toList();
+		uploadImageFiles(coffee, request.images());
+		deleteImages(imagesToDelete);
+	}
 
+	private void uploadImageFiles(final Coffee coffee, final List<MultipartFile> images) {
+		if (images.stream().anyMatch(MultipartFile::isEmpty)) {
+			return;
+		}
+		final List<String> uploadedImages = imageService.uploadImages(images);
+		imageRepository.saveAll(Image.saveImage(coffee, uploadedImages));
+	}
+
+	private void deleteImages(final List<String> imageUrls) {
+		if (imageUrls.isEmpty()) {
+			return;
+		}
+		System.out.println("delete imageUrs>>>" + imageUrls);
+		imageService.deleteImages(imageUrls);
+		imageRepository.deleteByUrls(imageUrls);
+	}
 }
