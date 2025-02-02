@@ -70,33 +70,36 @@ public class JwtUtility {
 
 	public Claims validateAccessToken(String token) throws JwtValidationException {
 		try {
+			// 1. 변수 선언 (JWT 파싱 관련)
 			final SecretKeySpec keySpec = new SecretKeySpec(
 				secretKey.getBytes(StandardCharsets.UTF_8),
 				"HmacSHA512"
 			);
+
 			final Claims claims = Jwts.parser()
 				.verifyWith(keySpec)
 				.build()
 				.parseSignedClaims(token)
 				.getPayload();
+
 			final String subject = claims.getSubject();
 			final String[] parts = subject.split(", ");
 			final Integer tokenVersion = claims.get("version", Integer.class);
-			final long userId = Long.parseLong(parts[0]);  // 먼저 초기화
-			final Optional<RefreshToken> latestToken = refreshTokenRepository.findLatestByUser(
-				User.builder().id(userId).build()
-			);
 			if (!subject.contains(", ") || parts.length != 2) {
 				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
 			}
 			if (tokenVersion == null) {
 				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
 			}
+			long userId;
 			try {
-				Long.parseLong(parts[0]);
+				userId = Long.parseLong(parts[0]);
 			} catch (NumberFormatException e) {
 				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
 			}
+			final Optional<RefreshToken> latestToken = refreshTokenRepository.findLatestByUser(
+				User.builder().id(userId).build()
+			);
 			if (latestToken.isEmpty() || !latestToken.get().getTokenVersion()
 				.equals(tokenVersion)) {
 				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
