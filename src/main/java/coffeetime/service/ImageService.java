@@ -42,11 +42,12 @@ public class ImageService {
 	private String uploadImageToBucket(final MultipartFile file) {
 		final ImageFile imageFile = new ImageFile(file);
 		final String objectKey = imageFile.getFilename();
+		final String contentType = getFileContentType(file);
 		try {
 			final PutObjectRequest putObjectRequest = PutObjectRequest.builder()
 				.bucket(bucket)
 				.key(IMAGE_PREFIX + objectKey)
-				.contentType(file.getContentType())
+				.contentType(contentType)
 				.build();
 			s3Client.putObject(putObjectRequest,
 				RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
@@ -82,6 +83,15 @@ public class ImageService {
 				throw new CoffeeTimeException(EntryPayloadCode.FAIL_IMAGE_DELETE);
 			}
 		}
+	}
+
+	private String getFileContentType(final MultipartFile file) {
+		final String originalFilename = file.getOriginalFilename();
+		final String contentType = file.getContentType();
+		if (originalFilename != null && originalFilename.toLowerCase().endsWith(".heic")) {
+			return "image/heic";
+		}
+		return contentType != null ? contentType : "application/octet-stream";
 	}
 
 	private String getS3ObjectUrl(final String objectKey) {
