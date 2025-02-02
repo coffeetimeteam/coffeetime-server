@@ -9,6 +9,7 @@ import coffeetime.exception.EntryPayloadCode;
 import coffeetime.repository.ImageRepository;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,9 +35,15 @@ public class ImageService {
 	private final String IMAGE_PREFIX = "coffee/";
 
 	public List<String> uploadImages(List<MultipartFile> multipartFiles) {
-		return multipartFiles.stream()
-			.map(this::uploadImageToBucket)
+		List<CompletableFuture<String>> futures = multipartFiles.stream()
+			.map(this::uploadImageToBucketAsync).toList();
+		return futures.stream()
+			.map(CompletableFuture::join)
 			.collect(Collectors.toList());
+	}
+
+	private CompletableFuture<String> uploadImageToBucketAsync(final MultipartFile file) {
+		return CompletableFuture.supplyAsync(() -> uploadImageToBucket(file));
 	}
 
 	private String uploadImageToBucket(final MultipartFile file) {
