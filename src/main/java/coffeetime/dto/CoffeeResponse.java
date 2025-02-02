@@ -1,9 +1,11 @@
 package coffeetime.dto;
 
 import coffeetime.domain.Coffee;
+import coffeetime.domain.Image;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public record CoffeeResponse(
 	Long id,
@@ -15,10 +17,11 @@ public record CoffeeResponse(
 	String tasteType,
 	String priceType,
 	Integer coffeeScore,
-	List<String> imageKeys
+	List<String> imageUrls
 ) {
 
-	public static CoffeeResponse of(Coffee coffee, List<String> imageKeys) {
+
+	public static CoffeeResponse of(Coffee coffee, List<String> imageUrls) {
 		return new CoffeeResponse(
 			coffee.getId(),
 			coffee.getRememberDate(),
@@ -29,7 +32,16 @@ public record CoffeeResponse(
 			coffee.getTasteType().getTaste(),
 			coffee.getPriceType().getPrice(),
 			coffee.getCoffeeScore(),
-			imageKeys
+			imageUrls
 		);
 	}
-} 
+
+
+	public static List<CoffeeResponse> groupByMonth(List<Coffee> coffees) {
+		return coffees.stream()
+			.map(coffee -> of(coffee, coffee.getImages().stream()
+				.map(Image::getUrl)
+				.collect(Collectors.toList())))
+			.collect(Collectors.toList());
+	}
+}

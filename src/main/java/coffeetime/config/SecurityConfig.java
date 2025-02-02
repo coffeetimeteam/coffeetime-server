@@ -1,12 +1,12 @@
 package coffeetime.config;
 
-import coffeetime.domain.type.RoleType;
 import coffeetime.infrastructure.JwtTokenFilter;
 import coffeetime.service.CustomUserDetailsService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -66,9 +66,6 @@ public class SecurityConfig {
 						"/swagger-resources/**")
 					.permitAll()
 					.requestMatchers("/api/v1/auth/**", "/api/health-check").permitAll()
-					.requestMatchers("api/v1/coffee/**", "api/v1/my").authenticated()
-					.requestMatchers("api/v1/my/nickname").hasAnyAuthority(RoleType.GENERAL_USER.name(),
-						RoleType.SPECIAL_USER.name())
 					.anyRequest().authenticated())
 			.csrf(csrf -> csrf.disable())
 			.exceptionHandling(exception -> exception.authenticationEntryPoint(
@@ -85,7 +82,8 @@ public class SecurityConfig {
 						HttpServletRequest request) {
 						CorsConfiguration config = new CorsConfiguration();
 						config.setAllowedOriginPatterns(
-							Arrays.asList("http://localhost:3030",
+							Arrays.asList(
+								"http://localhost:3030",
 								"https://coffeetime.parkgadan.com")
 						);
 						config.setAllowedMethods(
@@ -94,8 +92,8 @@ public class SecurityConfig {
 							Collections.singletonList("*"));
 						config.setAllowCredentials(true);
 						config.setExposedHeaders(
-							Arrays.asList("Authorization"));
-						config.setMaxAge(3600L);
+							List.of("Authorization"));
+						config.setMaxAge(86400L);
 						return config;
 					}
 				}));

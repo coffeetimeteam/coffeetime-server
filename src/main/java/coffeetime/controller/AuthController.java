@@ -1,5 +1,6 @@
 package coffeetime.controller;
 
+import coffeetime.config.SecurityRequiredOperation;
 import coffeetime.dto.GlobalResponse;
 import coffeetime.dto.LoginRequest;
 import coffeetime.dto.TokensResponse;
@@ -43,6 +44,12 @@ public class AuthController {
 		@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
 		final TokensResponse userTokens = tokenService.renewalTokens(bearerToken);
 		return ResponseEntity.ok().body(userTokens);
+	}
+
+	@GetMapping("/validate")
+	@SecurityRequiredOperation
+	public ResponseEntity<GlobalResponse> validateToken() {
+		return ResponseEntity.ok().body(new GlobalResponse(EntryPayloadCode.SUCCESS_REQUEST));
 	}
 }
 

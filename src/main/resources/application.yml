@@ -1,10 +1,7 @@
 spring:
-  profiles:
-    group:
-      dev: "dev"
-      prod: "prod"
-    include:
-      - security
+  group:
+    prod: "prod"
+    dev: "dev"
   devtools:
     restart:
       enabled: true
@@ -18,12 +15,44 @@ spring:
       credentials:
         accessKey: ${S3_ACCESS_KEY}
         secretKey: ${S3_SECRET_KEY}
-      region:
-        static: ap-northeast-2
-  server:
-    url: ${SERVER_URL}
+  datasource:
+    url: ${DB_HOST}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      leak-detection-threshold: 2000
+      validation-timeout: 5000
+      pool-name: CoffeeTimeHikariPool
+      data-source-properties:
+        applicationName: CoffeeTimeHikariPool
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 20MB
+      resolve-lazily: true
+
 
 logging:
   discord:
     webhook-url: ${DISCORD_WEBHOOK}
 
+token:
+  jwt:
+    issuer: ${ISSUER}
+    secret: ${SECRET}
+    access-token-expiration: ${ACCESS_TOKEN_TIME}
+    refresh-token-expiration: ${REFRESH_TOKEN_TIME}

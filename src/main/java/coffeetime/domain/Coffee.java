@@ -6,6 +6,7 @@ import coffeetime.domain.type.PriceType;
 import coffeetime.domain.type.SizeType;
 import coffeetime.domain.type.TasteType;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -15,18 +16,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Null;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import jakarta.persistence.Column;
-import java.util.ArrayList;
-import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "coffee")
@@ -102,7 +100,7 @@ public class Coffee {
 		this.images = images;
 	}
 
-	public static Coffee createCoffee(
+	public static Coffee create(
 		final User user,
 		final LocalDate rememberDate,
 		final LocalTime rememberTime,
@@ -114,7 +112,7 @@ public class Coffee {
 		final Integer coffeeScore,
 		final List<Image> images
 	) {
-		return builder()
+		return Coffee.builder()
 			.user(user)
 			.rememberDate(rememberDate)
 			.rememberTime(rememberTime)
