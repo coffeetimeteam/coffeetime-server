@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -40,6 +41,7 @@ public record CoffeeCreateRequest(
 	@Max(value = 5, message = "점수는 5점 이하여야 합니다.")
 	int coffeeScore,
 
+	@Size(min = 0, max = 5, message = "이미지는 5장 이하로 가능합니다.")
 	List<MultipartFile> images
 ) {
 
