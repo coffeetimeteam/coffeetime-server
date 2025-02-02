@@ -29,4 +29,8 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 		WHERE image.coffee.id = :coffeeIds
 		""")
 	void deleteAllByCoffeeId(@Param("coffeeIds") final List<Long> coffeeIds);
+
+	@Query("DELETE FROM Image image WHERE image.url IN :urls")
+	@Modifying
+	void deleteByUrls(@Param("urls") List<String> urls);
 }
