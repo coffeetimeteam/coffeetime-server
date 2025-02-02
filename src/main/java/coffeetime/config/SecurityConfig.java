@@ -1,12 +1,12 @@
 package coffeetime.config;
 
-import coffeetime.domain.type.RoleType;
 import coffeetime.infrastructure.JwtTokenFilter;
 import coffeetime.service.CustomUserDetailsService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -92,8 +92,8 @@ public class SecurityConfig {
 							Collections.singletonList("*"));
 						config.setAllowCredentials(true);
 						config.setExposedHeaders(
-							Arrays.asList("Authorization"));
-						config.setMaxAge(3600L);
+							List.of("Authorization"));
+						config.setMaxAge(86400L);
 						return config;
 					}
 				}));

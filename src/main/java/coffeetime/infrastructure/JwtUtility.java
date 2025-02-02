@@ -1,5 +1,6 @@
 package coffeetime.infrastructure;
 
+import coffeetime.domain.RefreshToken;
 import coffeetime.domain.User;
 import coffeetime.exception.CoffeeTimeException;
 import coffeetime.exception.EntryPayloadCode;
@@ -10,6 +11,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Optional;
 import javax.crypto.spec.SecretKeySpec;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +37,8 @@ public class JwtUtility {
 	@Autowired
 	private RefreshTokenRepository refreshTokenRepository;
 
-	public JwtUtility() {}
+	public JwtUtility() {
+	}
 
 	public String generateAccessToken(User user, Integer tokenVersion) {
 		if (user.getId() == null || user.getUsername() == null) {
@@ -67,41 +70,37 @@ public class JwtUtility {
 
 	public Claims validateAccessToken(String token) throws JwtValidationException {
 		try {
-			SecretKeySpec keySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8),
-				"HmacSHA512");
-			Claims claims = Jwts.parser()
+			final SecretKeySpec keySpec = new SecretKeySpec(
+				secretKey.getBytes(StandardCharsets.UTF_8),
+				"HmacSHA512"
+			);
+			final Claims claims = Jwts.parser()
 				.verifyWith(keySpec)
 				.build()
 				.parseSignedClaims(token)
 				.getPayload();
-
-			String subject = claims.getSubject();
-			if (subject == null || !subject.contains(", ")) {
+			final String subject = claims.getSubject();
+			final String[] parts = subject.split(", ");
+			final Integer tokenVersion = claims.get("version", Integer.class);
+			final long userId = Long.parseLong(parts[0]);  // 먼저 초기화
+			final Optional<RefreshToken> latestToken = refreshTokenRepository.findLatestByUser(
+				User.builder().id(userId).build()
+			);
+			if (!subject.contains(", ") || parts.length != 2) {
 				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
 			}
-
-			String[] parts = subject.split(", ");
-			if (parts.length != 2) {
-				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
-			}
-
-			Long userId;
-			try {
-				userId = Long.parseLong(parts[0]);
-			} catch (NumberFormatException e) {
-				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
-			}
-
-			Integer tokenVersion = claims.get("version", Integer.class);
 			if (tokenVersion == null) {
 				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
 			}
-
-			var latestToken = refreshTokenRepository.findLatestByUser(User.builder().id(userId).build());
-			if (latestToken.isEmpty() || !latestToken.get().getTokenVersion().equals(tokenVersion)) {
+			try {
+				Long.parseLong(parts[0]);
+			} catch (NumberFormatException e) {
 				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
 			}
-
+			if (latestToken.isEmpty() || !latestToken.get().getTokenVersion()
+				.equals(tokenVersion)) {
+				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
+			}
 			return claims;
 		} catch (CoffeeTimeException e) {
 			throw e;
