@@ -1,5 +1,6 @@
 package coffeetime.repository;
 
+import coffeetime.domain.Coffee;
 import coffeetime.domain.Image;
 import coffeetime.domain.User;
 import feign.Param;
@@ -15,20 +16,7 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 	List<Image> findByCoffee_User(User user);
 
 	@Modifying
-	@Query("""
-		UPDATE Image image
-		SET image.status = 'DELETED'
-		WHERE image.coffee.id = :coffeeId
-		""")
-	void deleteByCoffeeId(@Param("coffeeId") final Long coffeeId);
-
-	@Modifying
-	@Query("""
-		UPDATE Image image
-		SET image.status = 'DELETED'
-		WHERE image.coffee.id = :coffeeIds
-		""")
-	void deleteAllByCoffeeId(@Param("coffeeIds") final List<Long> coffeeIds);
+	void deleteByCoffee(Coffee coffee);
 
 	@Query("DELETE FROM Image image WHERE image.url IN :urls")
 	@Modifying
