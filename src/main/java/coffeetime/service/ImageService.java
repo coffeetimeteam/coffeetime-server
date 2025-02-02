@@ -19,7 +19,6 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +28,6 @@ public class ImageService {
 	@Value("${spring.cloud.aws.s3.bucket}")
 	private String bucket;
 
-	private final S3Presigner s3Presigner;
 	private final S3Client s3Client;
 	private final ImageRepository imageRepository;
 
@@ -37,11 +35,11 @@ public class ImageService {
 
 	public List<String> uploadImages(List<MultipartFile> multipartFiles) {
 		return multipartFiles.stream()
-			.map(this::uploadImage)
+			.map(this::uploadImageToBucket)
 			.collect(Collectors.toList());
 	}
 
-	private String uploadImage(final MultipartFile file) {
+	private String uploadImageToBucket(final MultipartFile file) {
 		final ImageFile imageFile = new ImageFile(file);
 		final String objectKey = imageFile.getFilename();
 		try {
@@ -67,13 +65,23 @@ public class ImageService {
 		return CoffeeImageResponse.getCoffeeImages(imageUrls);
 	}
 
-	public void deleteImage(String url) {
-		String objectKey = extractObjectKey(url);
-		final DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-			.bucket(bucket)
-			.key(IMAGE_PREFIX + objectKey)
-			.build();
-		s3Client.deleteObject(deleteObjectRequest);
+	public void deleteImages(List<String> imageUrls) {
+		if (imageUrls.isEmpty()) {
+			throw new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_IMAG_DELETE);
+		}
+
+		for (String imageUrl : imageUrls) {
+			final String objectKey = extractObjectKey(imageUrl);
+			final DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+				.bucket(bucket)
+				.key(IMAGE_PREFIX + objectKey)
+				.build();
+			try {
+				s3Client.deleteObject(deleteObjectRequest);
+			} catch (Exception e) {
+				throw new CoffeeTimeException(EntryPayloadCode.FAIL_IMAGE_DELETE);
+			}
+		}
 	}
 
 	private String getS3ObjectUrl(final String objectKey) {
