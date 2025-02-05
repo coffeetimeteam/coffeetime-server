@@ -5,7 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import coffeetime.domain.DefaultNickname;
 import coffeetime.domain.User;
+import coffeetime.domain.type.LoginType;
+import coffeetime.domain.type.RoleType;
 import coffeetime.dto.GlobalResponse;
 import coffeetime.dto.UserCreateRequest;
 import coffeetime.exception.EntryPayloadCode;
@@ -14,18 +17,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-@Import(JwtTokenFilter.class)
 public class AuthenticationTests {
 
 	@MockBean
@@ -35,12 +37,25 @@ public class AuthenticationTests {
 	private UserService userService;
 
 	@MockBean
+	private DefaultNickname defaultNickname;
+
+	@MockBean
+	private PasswordEncoder passwordEncoder;
+
+	@MockBean
 	private CustomUserDetails mockUserDetails;
 
 	@BeforeEach
 	void setUp() {
-		final User mockUser = new User("auth@email.com", "password");
-		final CustomUserDetails mockUserDetails = new CustomUserDetails(mockUser);
+		UserCreateRequest request = new UserCreateRequest("auth@email.com", "password",
+			"password");
+		User mockUser = User.createUser(
+			LoginType.EMAIL,
+			request.getUsername(),
+			defaultNickname.generate(),
+			passwordEncoder.encode(request.getPassword()),
+			RoleType.GENERAL_USER);
+		mockUserDetails = new CustomUserDetails(mockUser);
 		mockUserDetails.getUsername();
 	}
 
@@ -60,17 +75,16 @@ public class AuthenticationTests {
 
 	@Test
 	public void testAuthenticationSuccess() {
+		// given
 		final String username = "auth@email.com";
 		final String password = "password";
 
 		GlobalResponse mockResponse = new GlobalResponse(EntryPayloadCode.SUCCESS_REQUEST);
-
 		Authentication mockAuthentication = new UsernamePasswordAuthenticationToken(
 			mockUserDetails,
 			password,
 			mockUserDetails.getAuthorities()
 		);
-
 		when(authenticationManager.authenticate(
 			new UsernamePasswordAuthenticationToken(username, password)))
 			.thenReturn(mockAuthentication);
