@@ -10,6 +10,8 @@ public enum EntryPayloadCode {
 	SUCCESS_REQUEST(HttpStatus.OK, "성공한 요청입니다."),
 	SUCCESS_LOGOUT(HttpStatus.OK, "로그아웃에 성공했습니다."),
 
+	SUCCESS_CREATED(HttpStatus.CREATED, "생성에 성공했습니다."),
+
 	DUPLICATED_USER(HttpStatus.CONFLICT, "이미 가입한 회원입니다."),
 	DUPLICATED_NICKNAME(HttpStatus.CONFLICT, "이미 존재하는 닉네임입니다."),
 
@@ -30,6 +32,7 @@ public enum EntryPayloadCode {
 
 	BAD_FORM_DATA(HttpStatus.BAD_REQUEST, "잘못된 형식입니다."),
 
+	FAIL_FEED_MESSAGES(HttpStatus.INTERNAL_SERVER_ERROR, "메세지 생성에 실패했습니다."),
 	NOT_FOUND_AUTH(HttpStatus.INTERNAL_SERVER_ERROR, "시큐리티 인증 정보가 없습니다"),
 	FAIL_IMAGE_UPLOAD(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드에 실패했습니다."),
 	FAIL_SAVE_COFFEE(HttpStatus.INTERNAL_SERVER_ERROR, "커피 기록 저장에 실패했습니다."),
