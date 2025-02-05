@@ -90,28 +90,20 @@ public class User {
 			.build();
 	}
 
-
-	public User(final LoginType loginType, final String username, final String nickname,
-		final String password, final RoleType role) {
-		this.loginType = loginType;
-		this.username = username;
-		this.nickname = nickname;
-		this.password = password;
-		this.role = role;
-		this.modifiedAt = LocalDateTime.now();
+	public static User createUserFromClaims(final Long id,
+		final String username, final RoleType role) {
+		return User.builder()
+			.id(id)
+			.username(username)
+			.role(role)
+			.build();
 	}
 
-	public User(final LoginType loginType, final Long id, final String username,
-		final String nickname, final RoleType role) {
-		this(id, loginType, username, nickname, null, role);
-	}
-
-	public User(final Long id, final String username, final RoleType role) {
-		this(id, null, username, null, null, role);
-	}
-
-	public User(final String username, final String password) {
-		this(null, username, null, password, null);
+	public static User createUserFromForm(final String username, final String password) {
+		return User.builder()
+			.username(username)
+			.password(password)
+			.build();
 	}
 
 	public boolean isDeleted() {

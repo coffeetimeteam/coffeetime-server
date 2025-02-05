@@ -50,15 +50,18 @@ public class TokenServiceTests {
 			.role(RoleType.GENERAL_USER)
 			.build();
 
-		testAccessToken = jwtUtility.generateAccessToken(testUser);
+		testAccessToken = jwtUtility.generateAccessToken(testUser, 0);
 		testRefreshToken = jwtUtility.generateRefreshToken();
 	}
 
 	@Test
 	public void testGenerateTokens() {
 		// given
+		RefreshToken savedToken = RefreshToken.createRefreshToken(testUser, testRefreshToken, 
+			new Date(System.currentTimeMillis() + 3600000), 0);
+
 		when(refreshTokenRepository.save(any(RefreshToken.class)))
-			.thenReturn(new RefreshToken(testUser, testRefreshToken, new Date()));
+			.thenReturn(savedToken);
 
 		// when
 		TokensResponse tokens = tokenService.generateTokens(testUser);
@@ -67,13 +70,15 @@ public class TokenServiceTests {
 		assertThat(tokens).isNotNull();
 		assertThat(tokens.accessToken()).isNotNull();
 		assertThat(tokens.refreshToken()).isNotNull();
+		assertThat(tokens.accessToken()).isEqualTo(testAccessToken);
+		assertThat(tokens.refreshToken()).isEqualTo(testRefreshToken);
 	}
 
 	@Test
 	public void testRenewalTokensSuccess() {
 		// given
 		String bearerToken = "Bearer " + testRefreshToken;
-		RefreshToken savedToken = new RefreshToken(testUser, testRefreshToken,
+		RefreshToken savedToken =  RefreshToken.createRefreshToken(testUser, testRefreshToken,
 			new Date(System.currentTimeMillis() + 3600000));
 
 		when(refreshTokenRepository.findByToken(testRefreshToken))
@@ -105,7 +110,7 @@ public class TokenServiceTests {
 	public void testDeleteRefreshToken() {
 		// given
 		String bearerToken = "Bearer " + testRefreshToken;
-		RefreshToken savedToken = new RefreshToken(testUser, testRefreshToken,
+		RefreshToken savedToken = RefreshToken.createRefreshToken(testUser, testRefreshToken,
 			new Date(System.currentTimeMillis() + 3600000));
 
 		when(refreshTokenRepository.findByToken(testRefreshToken))
@@ -115,7 +120,6 @@ public class TokenServiceTests {
 		tokenService.deleteRefreshToken(bearerToken);
 
 		// then
-		// verify deletion was called (no exception thrown)
 		assertThat(true).isTrue();
 	}
 
