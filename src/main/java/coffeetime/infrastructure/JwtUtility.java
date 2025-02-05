@@ -41,7 +41,7 @@ public class JwtUtility {
 	}
 
 	public String generateAccessToken(User user, Integer tokenVersion) {
-		if (user.getId() == null || user.getUsername() == null) {
+		if (user == null || user.getId() == null || user.getUsername() == null) {
 			throw new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_USER);
 		}
 		String subject = String.format("%s, %s", user.getId(), user.getUsername());
@@ -51,7 +51,7 @@ public class JwtUtility {
 	private String generateToken(String subject, Integer expirationMinutes, String role,
 		Integer version) {
 		long expirationTimeInMillis = System.currentTimeMillis() + expirationMinutes * 60 * 1000;
-		String token = Jwts.builder()
+		return Jwts.builder()
 			.subject(subject)
 			.issuer(tokenIssuer)
 			.issuedAt(new Date())
@@ -61,7 +61,6 @@ public class JwtUtility {
 			.signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)),
 				Jwts.SIG.HS512)
 			.compact();
-		return token;
 	}
 
 	public String generateRefreshToken() {
@@ -70,18 +69,15 @@ public class JwtUtility {
 
 	public Claims validateAccessToken(String token) throws JwtValidationException {
 		try {
-			// 1. 변수 선언 (JWT 파싱 관련)
 			final SecretKeySpec keySpec = new SecretKeySpec(
 				secretKey.getBytes(StandardCharsets.UTF_8),
 				"HmacSHA512"
 			);
-
 			final Claims claims = Jwts.parser()
 				.verifyWith(keySpec)
 				.build()
 				.parseSignedClaims(token)
 				.getPayload();
-
 			final String subject = claims.getSubject();
 			final String[] parts = subject.split(", ");
 			final Integer tokenVersion = claims.get("version", Integer.class);
