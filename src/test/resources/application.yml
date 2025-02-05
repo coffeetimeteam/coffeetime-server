@@ -1,19 +1,7 @@
 spring:
-  config:
-    activate:
-      on-profile: "test"
-  datasource:
-    url: ${TEST_DB_HOST}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-  jpa:
-    show-sql: true
-      hibernate:
-        ddl-auto: update
-      properties:
-        hibernate:
-          format_sql: true
+  profiles:
+    active:
+      local
   devtools:
     restart:
       enabled: true
@@ -23,23 +11,45 @@ spring:
   cloud:
     aws:
       s3:
-
+        bucket: ${S3_BUCKET}
       credentials:
         accessKey: ${S3_ACCESS_KEY}
         secretKey: ${S3_SECRET_KEY}
-      region:
-        static: ap-northeast-2
-
-  server:
-    url: ${SERVER_URL}
-
+  datasource:
+    url: ${DB_HOST}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      leak-detection-threshold: 2000
+      validation-timeout: 5000
+      pool-name: CoffeeTimeHikariPool
+      data-source-properties:
+        applicationName: CoffeeTimeHikariPool
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 250MB
+      resolve-lazily: true
+logging:
+  discord:
+    webhook-url: ${DISCORD_WEBHOOK}
 token:
   jwt:
     issuer: ${ISSUER}
     secret: ${SECRET}
     access-token-expiration: ${ACCESS_TOKEN_TIME}
     refresh-token-expiration: ${REFRESH_TOKEN_TIME}
-
-logging:
-  discord:
-    webhook-url: ${DISCORD_WEBHOOK}
