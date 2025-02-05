@@ -67,7 +67,7 @@ public class User {
 	private LocalDateTime deletedAt = null;
 
 	@Builder
-	public User(final Long id, final LoginType loginType, final String username,
+	private User(final Long id, final LoginType loginType, final String username,
 		final String nickname, final String password, final RoleType role) {
 		this.id = id;
 		this.loginType = loginType;

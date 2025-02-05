@@ -14,6 +14,7 @@ import coffeetime.dto.CoffeeCreateRequest;
 import coffeetime.dto.CoffeeFormResponse;
 import coffeetime.dto.CoffeeResponse;
 import coffeetime.dto.CoffeeUpdateRequest;
+import coffeetime.dto.GlobalResponse;
 import coffeetime.exception.CoffeeTimeException;
 import coffeetime.exception.EntryPayloadCode;
 import coffeetime.exception.GlobalExceptionHandler;
@@ -42,7 +43,7 @@ public class CoffeeService {
 		GlobalExceptionHandler.class);
 
 	@Transactional
-	public void createCoffee(final CoffeeCreateRequest request) {
+	public GlobalResponse createCoffee(final CoffeeCreateRequest request) {
 		final User currentUser = userService.getCurrentUser();
 		final Coffee saveCoffee = Coffee.create(
 			currentUser,
@@ -60,6 +61,7 @@ public class CoffeeService {
 			throw new CoffeeTimeException(EntryPayloadCode.FAIL_SAVE_COFFEE);
 		}
 		uploadImageFiles(coffee, request.images());
+		return new GlobalResponse(EntryPayloadCode.SUCCESS_CREATED);
 	}
 
 	@Transactional(readOnly = true)
