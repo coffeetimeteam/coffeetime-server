@@ -2,7 +2,7 @@ package coffeetime.dto;
 
 import static lombok.AccessLevel.PRIVATE;
 
-import coffeetime.domain.User;
+import coffeetime.domain.Member;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -13,8 +13,8 @@ public class UserCreateResponse {
 	private final Long id;
 	private final String username;
 
-	public static UserCreateResponse from(final User user) {
-		return new UserCreateResponse(user.getId(), user.getUsername());
+	public static UserCreateResponse from(final Member member) {
+		return new UserCreateResponse(member.getId(), member.getUsername());
 	}
 }
 
