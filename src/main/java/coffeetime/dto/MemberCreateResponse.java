@@ -8,13 +8,13 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor(access = PRIVATE)
-public class UserCreateResponse {
+public class MemberCreateResponse {
 
 	private final Long id;
 	private final String username;
 
-	public static UserCreateResponse from(final Member member) {
-		return new UserCreateResponse(member.getId(), member.getUsername());
+	public static MemberCreateResponse from(final Member member) {
+		return new MemberCreateResponse(member.getId(), member.getUsername());
 	}
 }
 

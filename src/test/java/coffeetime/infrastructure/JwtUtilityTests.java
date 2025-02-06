@@ -4,61 +4,83 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import coffeetime.domain.User;
+import coffeetime.config.SecurityConfig;
+import coffeetime.domain.Member;
 import coffeetime.domain.type.LoginType;
 import coffeetime.domain.type.RoleType;
-import coffeetime.exception.JwtValidationException;
-import org.junit.jupiter.api.BeforeAll;
+import coffeetime.exception.CoffeeTimeException;
+import coffeetime.repository.MemberRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.Transactional;
 
+@SpringBootTest
+@Transactional
+@Import(SecurityConfig.class)
 public class JwtUtilityTests {
 
-	private static JwtUtility jwtUtility;
+	@Autowired
+	private JwtUtility jwtUtility;
 
-	@BeforeAll
-	static void setup() {
-		jwtUtility = new JwtUtility();
-		jwtUtility.updateTokenIssuer("coffeetime");
-		jwtUtility.updateAccessTokenExpiration(2);
+	@Autowired
+	private MemberRepository memberRepository;
+
+	@BeforeEach
+	void setup() {
+		jwtUtility.updateTokenIssuer("test_token_issuer");
+		jwtUtility.updateAccessTokenExpiration(5);
 		jwtUtility.updateSecretKey(
-			"coffeetime_access_secret_key_must_be_at_least_32_bytes_long_for_security");
+			"test_access_secret_key_must_be_at_least_32_bytes_long_for_security_12312312312");
 	}
 
 	@Test
 	public void testGenerateFail() {
-		assertThrows(IllegalArgumentException.class, new Executable() {
-			@Override
-			public void execute() throws Throwable {
-				User user = null;
-				jwtUtility.generateAccessToken(user, 0);
-			}
-		});
+		// given
+		Member member = null;
+
+		// when & then
+		assertThrows(CoffeeTimeException.class,
+			() -> jwtUtility.generateAccessToken(member, 0));
 	}
+
 
 	@Test
 	public void testGenerateSuccess() {
-		User user = new User(1L, LoginType.EMAIL, "test@email.com",
+		// given
+		Member createTestMember = Member.createUser(LoginType.EMAIL, "test@email.com",
 			"화려한 아메리카노", "12341234", RoleType.GENERAL_USER);
-		String token = jwtUtility.generateAccessToken(user, 0);
-		assertNotNull(token);
+		Member savedMember = memberRepository.save(createTestMember);
+		String token = jwtUtility.generateAccessToken(savedMember, 0);
 
+		// when && then
+		assertNotNull(token);
 		System.out.println(token);
 	}
 
+
 	@Test
 	public void testValidateFail() {
-		assertThrows(JwtValidationException.class, () -> {
-			jwtUtility.validateAccessToken("a.b.c");
+		// given
+		String failAccessToken = "this_is_fail_access_token";
+
+		// when & then
+		assertThrows(CoffeeTimeException.class, () -> {
+			jwtUtility.validateAccessToken(failAccessToken);
 		});
 	}
 
 	@Test
 	public void testValidateSuccess() {
-		User user = new User(1L, LoginType.EMAIL, "test@email.com",
+		//given
+		Member member = Member.createUser(LoginType.EMAIL, "test@email.com",
 			"화려한 아메리카노",
 			"12341234", RoleType.GENERAL_USER);
-		String token = jwtUtility.generateAccessToken(user, 0);
+		String token = jwtUtility.generateAccessToken(member, 0);
+
+		// then
 		assertNotNull(token);
 		assertDoesNotThrow(() -> {
 			jwtUtility.validateAccessToken(token);

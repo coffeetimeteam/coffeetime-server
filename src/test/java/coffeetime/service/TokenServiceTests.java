@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import coffeetime.domain.Member;
 import coffeetime.domain.RefreshToken;
-import coffeetime.domain.User;
 import coffeetime.domain.type.LoginType;
 import coffeetime.domain.type.RoleType;
 import coffeetime.dto.TokensResponse;
@@ -35,13 +35,13 @@ public class TokenServiceTests {
 	@MockBean
 	private RefreshTokenRepository refreshTokenRepository;
 
-	private User testUser;
+	private Member testMember;
 	private String testAccessToken;
 	private String testRefreshToken;
 
 	@BeforeEach
 	void setUp() {
-		testUser = User.builder()
+		testMember = Member.builder()
 			.id(1L)
 			.loginType(LoginType.EMAIL)
 			.username("test@email.com")
@@ -50,21 +50,21 @@ public class TokenServiceTests {
 			.role(RoleType.GENERAL_USER)
 			.build();
 
-		testAccessToken = jwtUtility.generateAccessToken(testUser, 0);
+		testAccessToken = jwtUtility.generateAccessToken(testMember, 0);
 		testRefreshToken = jwtUtility.generateRefreshToken();
 	}
 
 	@Test
 	public void testGenerateTokens() {
 		// given
-		RefreshToken savedToken = RefreshToken.createRefreshToken(testUser, testRefreshToken, 
+		RefreshToken savedToken = RefreshToken.createRefreshToken(testMember, testRefreshToken,
 			new Date(System.currentTimeMillis() + 3600000), 0);
 
 		when(refreshTokenRepository.save(any(RefreshToken.class)))
 			.thenReturn(savedToken);
 
 		// when
-		TokensResponse tokens = tokenService.generateTokens(testUser);
+		TokensResponse tokens = tokenService.generateTokens(testMember);
 
 		// then
 		assertThat(tokens).isNotNull();
@@ -78,7 +78,7 @@ public class TokenServiceTests {
 	public void testRenewalTokensSuccess() {
 		// given
 		String bearerToken = "Bearer " + testRefreshToken;
-		RefreshToken savedToken =  RefreshToken.createRefreshToken(testUser, testRefreshToken,
+		RefreshToken savedToken = RefreshToken.createRefreshToken(testMember, testRefreshToken,
 			new Date(System.currentTimeMillis() + 3600000));
 
 		when(refreshTokenRepository.findByToken(testRefreshToken))
@@ -110,7 +110,7 @@ public class TokenServiceTests {
 	public void testDeleteRefreshToken() {
 		// given
 		String bearerToken = "Bearer " + testRefreshToken;
-		RefreshToken savedToken = RefreshToken.createRefreshToken(testUser, testRefreshToken,
+		RefreshToken savedToken = RefreshToken.createRefreshToken(testMember, testRefreshToken,
 			new Date(System.currentTimeMillis() + 3600000));
 
 		when(refreshTokenRepository.findByToken(testRefreshToken))
