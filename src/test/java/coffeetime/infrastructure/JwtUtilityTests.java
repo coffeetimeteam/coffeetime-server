@@ -6,19 +6,21 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import coffeetime.config.SecurityConfig;
 import coffeetime.domain.Member;
-import coffeetime.domain.type.LoginType;
 import coffeetime.domain.type.RoleType;
+import coffeetime.dto.GlobalResponse;
+import coffeetime.dto.LoginRequest;
+import coffeetime.dto.MemberCreateRequest;
+import coffeetime.dto.TokensResponse;
 import coffeetime.exception.CoffeeTimeException;
-import coffeetime.repository.MemberRepository;
+import coffeetime.service.AuthService;
+import coffeetime.service.MemberService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
-@Transactional
 @Import(SecurityConfig.class)
 public class JwtUtilityTests {
 
@@ -26,12 +28,15 @@ public class JwtUtilityTests {
 	private JwtUtility jwtUtility;
 
 	@Autowired
-	private MemberRepository memberRepository;
+	private MemberService memberService;
+
+	@Autowired
+	private AuthService authService;
 
 	@BeforeEach
 	void setup() {
 		jwtUtility.updateTokenIssuer("test_token_issuer");
-		jwtUtility.updateAccessTokenExpiration(5);
+		jwtUtility.updateAccessTokenExpiration(5000);
 		jwtUtility.updateSecretKey(
 			"test_access_secret_key_must_be_at_least_32_bytes_long_for_security_12312312312");
 	}
@@ -50,12 +55,23 @@ public class JwtUtilityTests {
 	@Test
 	public void testGenerateSuccess() {
 		// given
-		Member createTestMember = Member.createUser(LoginType.EMAIL, "test@email.com",
-			"화려한 아메리카노", "12341234", RoleType.GENERAL_USER);
-		Member savedMember = memberRepository.save(createTestMember);
-		String token = jwtUtility.generateAccessToken(savedMember, 0);
+		MemberCreateRequest memberCreateRequest = new MemberCreateRequest("test@email.com",
+			"12341234",
+			"12341234");
+		GlobalResponse createMemberResponse = memberService.createMember(memberCreateRequest);
+		assertNotNull(createMemberResponse, "createMemberResponse should not be null");
 
-		// when && then
+		LoginRequest loginRequest = new LoginRequest("test@email.com", "12341234");
+		TokensResponse tokensResponse = authService.loginTokens(loginRequest);
+		assertNotNull(tokensResponse, "tokensResponse should not be null");
+
+		Member member = Member.createFromClaims(1L, "test@email.com", RoleType.GENERAL_USER);
+		assertNotNull(member, "Member should not be null after login");
+
+		// when
+		String token = jwtUtility.generateAccessToken(member, 0);
+
+		// then
 		assertNotNull(token);
 		System.out.println(token);
 	}
@@ -67,23 +83,28 @@ public class JwtUtilityTests {
 		String failAccessToken = "this_is_fail_access_token";
 
 		// when & then
-		assertThrows(CoffeeTimeException.class, () -> {
-			jwtUtility.validateAccessToken(failAccessToken);
-		});
+		assertThrows(CoffeeTimeException.class,
+			() -> jwtUtility.validateAccessToken(failAccessToken));
 	}
 
 	@Test
 	public void testValidateSuccess() {
-		//given
-		Member member = Member.createUser(LoginType.EMAIL, "test@email.com",
-			"화려한 아메리카노",
-			"12341234", RoleType.GENERAL_USER);
-		String token = jwtUtility.generateAccessToken(member, 0);
+		// given
+		MemberCreateRequest memberCreateRequest = new MemberCreateRequest(
+			"validate@email.com",
+			"12341234",
+			"12341234"
+		);
+		GlobalResponse createMemberResponse = memberService.createMember(memberCreateRequest);
+		assertNotNull(createMemberResponse, "createMemberResponse should not be null");
+		LoginRequest loginRequest = new LoginRequest("validate@email.com", "12341234");
+
+		// when
+		TokensResponse tokensResponse = authService.loginTokens(loginRequest);
+		assertNotNull(tokensResponse, "tokensResponse should not be null");
 
 		// then
-		assertNotNull(token);
-		assertDoesNotThrow(() -> {
-			jwtUtility.validateAccessToken(token);
-		});
+		assertNotNull(tokensResponse.accessToken());
+		assertDoesNotThrow(() -> jwtUtility.validateAccessToken(tokensResponse.accessToken()));
 	}
 }
