@@ -2,6 +2,10 @@ spring:
   profiles:
     active:
       test
+  jpa:
+    hibernate:
+      ddl-auto:
+        create-drop
   cloud:
     aws:
       s3:
