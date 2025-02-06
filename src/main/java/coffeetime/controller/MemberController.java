@@ -1,6 +1,5 @@
 package coffeetime.controller;
 
-import coffeetime.config.SecurityRequiredOperation;
 import coffeetime.domain.Member;
 import coffeetime.dto.GlobalResponse;
 import coffeetime.dto.MemberCreateRequest;
@@ -8,10 +7,12 @@ import coffeetime.dto.MemberResponse;
 import coffeetime.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,14 +27,14 @@ public class MemberController {
 	public ResponseEntity<GlobalResponse> createMember(
 		@RequestBody @Valid final MemberCreateRequest request
 	) {
-		final GlobalResponse response = memberService.createUser(request);
+		final GlobalResponse response = memberService.createMember(request);
 		return ResponseEntity.ok().body(response);
 	}
 
 	@GetMapping("/my")
-	@SecurityRequiredOperation
-	public ResponseEntity<MemberResponse> getMemberInfo() {
-		final Member member = memberService.getCurrentUser();
+	public ResponseEntity<MemberResponse> getMemberInfo(
+		@RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+		final Member member = memberService.getCurrentMember(token);
 		final MemberResponse response = new MemberResponse(member.getId(), member.getUsername(),
 			member.getNickname(), member.getRole());
 		return ResponseEntity.ok().body(response);

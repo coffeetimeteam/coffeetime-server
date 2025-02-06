@@ -23,6 +23,7 @@ public enum EntryPayloadCode {
 	INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."),
 	EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
 	NOT_FOUND_TOKEN(HttpStatus.UNAUTHORIZED, "토큰을 찾을 수 없습니다."),
+	REQUIRED_TOKEN(HttpStatus.UNAUTHORIZED, "토큰을 입력해주세요."),
 	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "올바르지 않은 토큰입니다."),
 	FAIL_RENEWAL_TOKE(HttpStatus.UNAUTHORIZED, "토큰 갱신을 실패했습니다."),
 	FAIL_LOGOUT(HttpStatus.UNAUTHORIZED, "로그아웃에 실패했습니다."),

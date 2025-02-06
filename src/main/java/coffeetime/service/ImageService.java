@@ -31,6 +31,7 @@ public class ImageService {
 
 	private final S3Client s3Client;
 	private final ImageRepository imageRepository;
+	private final MemberService memberService;
 
 	private final String IMAGE_PREFIX = "coffee/";
 
@@ -64,7 +65,8 @@ public class ImageService {
 		}
 	}
 
-	public CoffeeImageResponse findCoffeeImages(final Member member) {
+	public CoffeeImageResponse findCoffeeImages(final String token) {
+		final Member member = memberService.getCurrentMember(token);
 		final List<Image> images = imageRepository.findByCoffee_Member(member);
 		final List<String> imageUrls = images.stream().map(Image::getUrl).toList();
 		if (member.getId() == null) {

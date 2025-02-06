@@ -34,15 +34,15 @@ public class AuthController {
 
 	@PostMapping("/logout")
 	public ResponseEntity<GlobalResponse> logout(
-		@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
-		tokenService.deleteRefreshToken(bearerToken);
+		@RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+		tokenService.deleteRefreshToken(token);
 		return ResponseEntity.ok().body(new GlobalResponse(EntryPayloadCode.SUCCESS_LOGOUT));
 	}
 
 	@GetMapping("/token")
 	public ResponseEntity<TokensResponse> extendLogin(
-		@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
-		final TokensResponse userTokens = tokenService.renewalTokens(bearerToken);
+		@RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+		final TokensResponse userTokens = tokenService.renewalTokens(token);
 		return ResponseEntity.ok().body(userTokens);
 	}
 
