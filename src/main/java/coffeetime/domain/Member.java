@@ -40,7 +40,7 @@ public class Member {
 	private Long id;
 
 	@Column(nullable = false, unique = true)
-	@Size(min = 2, max = 20)
+	@Size(min = 5, max = 30)
 	private String username;
 
 	@Enumerated(EnumType.STRING)

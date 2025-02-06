@@ -35,7 +35,7 @@ public class MemberRepositoryTests {
 			"password",
 			"password"
 		);
-		memberService.createUser(request);
+		memberService.createMember(request);
 
 		// when
 		Optional<Member> foundUser = memberRepository.findByUsername("found@email.com");
