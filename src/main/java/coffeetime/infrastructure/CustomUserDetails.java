@@ -1,6 +1,6 @@
 package coffeetime.infrastructure;
 
-import coffeetime.domain.User;
+import coffeetime.domain.Member;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -8,27 +8,27 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public record CustomUserDetails(User user) implements UserDetails {
+public record CustomUserDetails(Member member) implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-		authorities.add(new SimpleGrantedAuthority(user.getRole().toString()));
+		authorities.add(new SimpleGrantedAuthority(member.getRole().toString()));
 		return authorities;
 	}
 
 	public Long getId() {
-		return user.getId();
+		return member.getId();
 	}
 
 	@Override
 	public String getUsername() {
-		return user.getUsername();
+		return member.getUsername();
 	}
 
 	@Override
 	public String getPassword() {
-		return user.getPassword();
+		return member.getPassword();
 	}
 
 	@Override

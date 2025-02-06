@@ -4,7 +4,7 @@ import static java.util.stream.Collectors.toList;
 
 import coffeetime.domain.Coffee;
 import coffeetime.domain.Image;
-import coffeetime.domain.User;
+import coffeetime.domain.Member;
 import coffeetime.domain.type.CoffeeType;
 import coffeetime.domain.type.LocationType;
 import coffeetime.domain.type.PriceType;
@@ -38,15 +38,15 @@ public class CoffeeService {
 	private final CoffeeRepository coffeeRepository;
 	private final ImageRepository imageRepository;
 	private final ImageService imageService;
-	private final UserService userService;
+	private final MemberService memberService;
 	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(
 		GlobalExceptionHandler.class);
 
 	@Transactional
 	public GlobalResponse createCoffee(final CoffeeCreateRequest request) {
-		final User currentUser = userService.getCurrentUser();
+		final Member currentMember = memberService.getCurrentUser();
 		final Coffee saveCoffee = Coffee.create(
-			currentUser,
+			currentMember,
 			request.rememberDate(),
 			request.rememberTime(),
 			LocationType.fromDisplayName(request.location()),
@@ -95,10 +95,10 @@ public class CoffeeService {
 	@Transactional(readOnly = true)
 	public List<Map<String, Object>> findCoffeesByMonth(final Integer year,
 		final Integer month) {
-		final User currentUser = userService.getCurrentUser();
+		final Member currentMember = memberService.getCurrentUser();
 		final LocalDate targetDate = (year == null || month == null) ? LocalDate.now() :
 			LocalDate.of(year, month, 1);
-		final List<Coffee> coffees = coffeeRepository.findCoffeesByMonth(currentUser,
+		final List<Coffee> coffees = coffeeRepository.findCoffeesByMonth(currentMember,
 			targetDate.getYear(),
 			targetDate.getMonthValue());
 		final List<CoffeeResponse> coffeeResponses = CoffeeResponse.groupByMonth(coffees);
@@ -129,9 +129,9 @@ public class CoffeeService {
 	@Transactional(readOnly = true)
 	public List<CoffeeResponse> findCoffeesByDate(final LocalDate date) {
 		final LocalDate targetDate = date != null ? date : LocalDate.now();
-		final User currentUser = userService.getCurrentUser();
+		final Member currentMember = memberService.getCurrentUser();
 		final List<Coffee> coffees = coffeeRepository.findCoffeesByDate(
-			currentUser, targetDate);
+			currentMember, targetDate);
 		return coffees.stream()
 			.map(coffee -> {
 				List<String> imageUrls = coffee.getImages().stream()
@@ -144,8 +144,8 @@ public class CoffeeService {
 
 	@Transactional
 	public void updateCoffee(final Long coffeeId, final CoffeeUpdateRequest request) {
-		final User currentUser = userService.getCurrentUser();
-		final Coffee coffee = coffeeRepository.findByIdAndUser(coffeeId, currentUser)
+		final Member currentMember = memberService.getCurrentUser();
+		final Coffee coffee = coffeeRepository.findByIdAndMember(coffeeId, currentMember)
 			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_COFFEE));
 		final List<String> currentImageUrls = coffee.getImages().stream()
 			.map(Image::getUrl)
@@ -177,8 +177,8 @@ public class CoffeeService {
 
 	@Transactional
 	public void deleteCoffee(final Long coffeeId) {
-		final User currentUser = userService.getCurrentUser();
-		final Coffee coffee = coffeeRepository.findByIdAndUser(coffeeId, currentUser)
+		final Member currentMember = memberService.getCurrentUser();
+		final Coffee coffee = coffeeRepository.findByIdAndMember(coffeeId, currentMember)
 			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_COFFEE));
 		try {
 			coffeeRepository.deleteById(coffee.getId());

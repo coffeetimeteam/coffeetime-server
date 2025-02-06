@@ -2,7 +2,7 @@ package coffeetime.service;
 
 import coffeetime.domain.Image;
 import coffeetime.domain.ImageFile;
-import coffeetime.domain.User;
+import coffeetime.domain.Member;
 import coffeetime.dto.CoffeeImageResponse;
 import coffeetime.exception.CoffeeTimeException;
 import coffeetime.exception.EntryPayloadCode;
@@ -64,10 +64,10 @@ public class ImageService {
 		}
 	}
 
-	public CoffeeImageResponse findCoffeeImages(final User user) {
-		final List<Image> images = imageRepository.findByCoffee_User(user);
+	public CoffeeImageResponse findCoffeeImages(final Member member) {
+		final List<Image> images = imageRepository.findByCoffee_Member(member);
 		final List<String> imageUrls = images.stream().map(Image::getUrl).toList();
-		if (user.getId() == null) {
+		if (member.getId() == null) {
 			throw new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_IMAGE);
 		}
 		return CoffeeImageResponse.getCoffeeImages(imageUrls);
