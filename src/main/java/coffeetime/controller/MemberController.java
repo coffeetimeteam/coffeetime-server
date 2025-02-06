@@ -1,11 +1,11 @@
 package coffeetime.controller;
 
 import coffeetime.config.SecurityRequiredOperation;
-import coffeetime.domain.User;
+import coffeetime.domain.Member;
 import coffeetime.dto.GlobalResponse;
 import coffeetime.dto.UserCreateRequest;
 import coffeetime.dto.UserResponse;
-import coffeetime.service.UserService;
+import coffeetime.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,24 +18,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
-public class UserController {
+public class MemberController {
 
-	private final UserService userService;
+	private final MemberService memberService;
 
 	@PostMapping("/auth/signup")
 	public ResponseEntity<GlobalResponse> createUser(
 		@RequestBody @Valid final UserCreateRequest request
 	) {
-		final GlobalResponse response = userService.createUser(request);
+		final GlobalResponse response = memberService.createUser(request);
 		return ResponseEntity.ok().body(response);
 	}
 
 	@GetMapping("/my")
 	@SecurityRequiredOperation
 	public ResponseEntity<UserResponse> getUserInfo() {
-		final User user = userService.getCurrentUser();
-		final UserResponse response = new UserResponse(user.getId(), user.getUsername(),
-			user.getNickname(), user.getRole());
+		final Member member = memberService.getCurrentUser();
+		final UserResponse response = new UserResponse(member.getId(), member.getUsername(),
+			member.getNickname(), member.getRole());
 		return ResponseEntity.ok().body(response);
 	}
 

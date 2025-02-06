@@ -37,8 +37,8 @@ public class CoffeeController {
 	public ResponseEntity<GlobalResponse> createCoffee(
 		@Valid @ModelAttribute CoffeeCreateRequest request
 	) {
-		coffeeService.createCoffee(request);
-		return ResponseEntity.ok().body(new GlobalResponse(EntryPayloadCode.SUCCESS_REQUEST));
+		final GlobalResponse response = coffeeService.createCoffee(request);
+		return ResponseEntity.ok().body(response);
 	}
 
 	@GetMapping("/form")

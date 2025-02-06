@@ -38,8 +38,8 @@ public class Coffee {
 	private Long id;
 
 	@ManyToOne
-	@JoinColumn(name = "user_id", referencedColumnName = "id")
-	private User user;
+	@JoinColumn(name = "member_id", referencedColumnName = "id")
+	private Member member;
 
 	@Column(nullable = false)
 	private LocalDate rememberDate;
@@ -76,7 +76,7 @@ public class Coffee {
 	@Builder
 	private Coffee(
 		final Long id,
-		final User user,
+		final Member member,
 		final LocalDate rememberDate,
 		final LocalTime rememberTime,
 		final LocationType locationType,
@@ -88,7 +88,7 @@ public class Coffee {
 		final List<Image> images
 	) {
 		this.id = id;
-		this.user = user;
+		this.member = member;
 		this.rememberDate = rememberDate;
 		this.rememberTime = rememberTime;
 		this.locationType = locationType;
@@ -101,7 +101,7 @@ public class Coffee {
 	}
 
 	public static Coffee create(
-		final User user,
+		final Member member,
 		final LocalDate rememberDate,
 		final LocalTime rememberTime,
 		final LocationType locationType,
@@ -113,7 +113,7 @@ public class Coffee {
 		final List<Image> images
 	) {
 		return Coffee.builder()
-			.user(user)
+			.member(member)
 			.rememberDate(rememberDate)
 			.rememberTime(rememberTime)
 			.locationType(locationType)
