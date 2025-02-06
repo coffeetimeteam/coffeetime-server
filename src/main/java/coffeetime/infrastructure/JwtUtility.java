@@ -1,7 +1,7 @@
 package coffeetime.infrastructure;
 
+import coffeetime.domain.Member;
 import coffeetime.domain.RefreshToken;
-import coffeetime.domain.User;
 import coffeetime.exception.CoffeeTimeException;
 import coffeetime.exception.EntryPayloadCode;
 import coffeetime.exception.JwtValidationException;
@@ -40,12 +40,12 @@ public class JwtUtility {
 	public JwtUtility() {
 	}
 
-	public String generateAccessToken(User user, Integer tokenVersion) {
-		if (user == null || user.getId() == null || user.getUsername() == null) {
+	public String generateAccessToken(Member member, Integer tokenVersion) {
+		if (member == null || member.getId() == null || member.getUsername() == null) {
 			throw new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_USER);
 		}
-		String subject = String.format("%s, %s", user.getId(), user.getUsername());
-		return generateToken(subject, accessTokenExpiration, user.getRole().name(), tokenVersion);
+		String subject = String.format("%s, %s", member.getId(), member.getUsername());
+		return generateToken(subject, accessTokenExpiration, member.getRole().name(), tokenVersion);
 	}
 
 	private String generateToken(String subject, Integer expirationMinutes, String role,
@@ -93,8 +93,8 @@ public class JwtUtility {
 			} catch (NumberFormatException e) {
 				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
 			}
-			final Optional<RefreshToken> latestToken = refreshTokenRepository.findLatestByUser(
-				User.builder().id(userId).build()
+			final Optional<RefreshToken> latestToken = refreshTokenRepository.findLatestByMember(
+				Member.builder().id(userId).build()
 			);
 			if (latestToken.isEmpty() || !latestToken.get().getTokenVersion()
 				.equals(tokenVersion)) {

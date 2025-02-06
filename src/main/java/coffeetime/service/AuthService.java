@@ -30,10 +30,10 @@ public class AuthService {
 		if (!authentication.isAuthenticated()) {
 			throw new CoffeeTimeException(EntryPayloadCode.BAD_CREDENTIAL);
 		}
-		if (userDetails.user() == null) {
+		if (userDetails.member() == null) {
 			throw new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_USER);
 		}
 
-		return tokenService.generateTokens(userDetails.user());
+		return tokenService.generateTokens(userDetails.member());
 	}
 }
