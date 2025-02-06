@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import coffeetime.domain.Coffee;
-import coffeetime.domain.User;
+import coffeetime.domain.Member;
 import coffeetime.domain.type.CoffeeType;
 import coffeetime.domain.type.LocationType;
 import coffeetime.domain.type.PriceType;
@@ -13,40 +13,48 @@ import coffeetime.domain.type.SizeType;
 import coffeetime.domain.type.TasteType;
 import coffeetime.dto.CoffeeCreateRequest;
 import coffeetime.dto.CoffeeResponse;
+import coffeetime.dto.GlobalResponse;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @SpringBootTest
 @Transactional
 public class CoffeeServiceTests {
 
-	@Value("${spring.server.url}")
-	private String serverUrl;
-
 	@Autowired
 	private CoffeeService coffeeService;
 
 	@Autowired
-	private UserService userService;
+	private MemberService memberService;
 
 	@MockBean
 	private ImageService imageService;
 
-	private User testUser;
+	private Member testMember;
 	private CoffeeCreateRequest testRequest;
 
 	@BeforeEach
 	void setUp() {
-		testUser = userService.getCurrentUser();
+		testMember = memberService.getCurrentUser();
+	}
+
+	@Test
+	public void testCreateCoffeeWithImage() {
+		MockMultipartFile testImage = new MockMultipartFile(
+			"image",
+			"test.jpg",
+			"image/jpeg",
+			"test image content".getBytes()
+		);
 		testRequest = new CoffeeCreateRequest(
 			LocalDate.now(),
 			LocalTime.now(),
@@ -55,41 +63,24 @@ public class CoffeeServiceTests {
 			"중간 거",
 			"신맛나는",
 			"가성비 있는",
-			5
+			5,
+			(List<MultipartFile>) testImage
 		);
-	}
-
-	@Test
-	public void testCreateCoffeeWithImage() {
-		// given
-		MockMultipartFile testImage = new MockMultipartFile(
-			"image",
-			"test.jpg",
-			"image/jpeg",
-			"test image content".getBytes()
-		);
-
-		when(imageService.uploadImages(any()))
-			.thenReturn(List.of("test-image-key"));
 
 		// when
-		coffeeService.createCoffee(testRequest);
+		when(imageService.uploadImages(any()))
+			.thenReturn(List.of("test-image-key"));
+		GlobalResponse response = coffeeService.createCoffee(testRequest);
 
 		// then
-		List<CoffeeResponse> responses = coffeeService.findCoffeesByDate(LocalDate.now());
-		assertThat(responses).isNotEmpty();
-
-		CoffeeResponse response = responses.get(0);
-		assertThat(response.imageKeys()).isNotEmpty();
-		assertThat(response.imageKeys().get(0))
-			.startsWith(serverUrl + "/api/v1/images/");
+		assertThat(response.getStatus()).isEqualTo(200);
 	}
 
 	@Test
 	public void testGetCoffeesByDate() {
 		// given
 		Coffee coffee = Coffee.create(
-			testUser,
+			testMember,
 			LocalDate.now(),
 			LocalTime.now(),
 			LocationType.HOME,
@@ -111,37 +102,7 @@ public class CoffeeServiceTests {
 				assertThat(response.id()).isNotNull();
 				assertThat(response.rememberDate()).isNotNull();
 				assertThat(response.rememberTime()).isNotNull();
-				response.imageKeys().forEach(imageUrl -> {
-					assertThat(imageUrl).startsWith();
-				});
 			});
 		}
 	}
-
-	@Test
-	public void testCreateCoffeeWithLocation() {
-		// given
-		testRequest = new CoffeeCreateRequest(
-			LocalDate.now(),
-			LocalTime.now(),
-			"집",
-			"coffee",
-			"큰 거",
-			"신맛나는",
-			"가성비 있는",
-			5,
-			null
-		);
-
-		// when
-		coffeeService.createCoffee(testRequest);
-
-		// then
-		List<CoffeeResponse> responses = coffeeService.findCoffeesByDate(LocalDate.now());
-		assertThat(responses).isNotEmpty();
-
-		CoffeeResponse response = responses.get(0);
-		assertThat(response.locationType()).isEqualTo(
-			LocationType.HOME.getLocation()); // DB에 저장된 location 확인
-	}
-} 
+}

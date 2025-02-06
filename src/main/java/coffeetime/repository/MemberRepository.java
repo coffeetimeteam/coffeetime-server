@@ -1,14 +1,14 @@
 package coffeetime.repository;
 
-import coffeetime.domain.User;
+import coffeetime.domain.Member;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long> {
 
-	Optional<User> findByUsername(String username);
+	Optional<Member> findByUsername(String username);
 
 	Boolean existsByUsername(String username);
 

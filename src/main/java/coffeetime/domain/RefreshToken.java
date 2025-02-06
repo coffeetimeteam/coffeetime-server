@@ -25,8 +25,8 @@ public class RefreshToken {
 	private Integer id;
 
 	@ManyToOne
-	@JoinColumn(name = "user_id", referencedColumnName = "id")
-	private User user;
+	@JoinColumn(name = "member_id", referencedColumnName = "id")
+	private Member member;
 
 	@Column(unique = true, nullable = false, length = 256)
 	private String token;
@@ -38,28 +38,28 @@ public class RefreshToken {
 	private Integer tokenVersion = 0;
 
 	@Builder
-	private RefreshToken(final Integer id, final User user, final String token,
+	private RefreshToken(final Integer id, final Member member, final String token,
 		final Date expiredAt, final Integer tokenVersion) {
 		this.id = id;
-		this.user = user;
+		this.member = member;
 		this.token = token;
 		this.expiredAt = expiredAt;
 		this.tokenVersion = tokenVersion;
 	}
 
-	public static RefreshToken createRefreshToken(final User userId, final String token,
+	public static RefreshToken createRefreshToken(final Member memberId, final String token,
 		final Date expiredAt, final Integer tokenVersion) {
 		return RefreshToken.builder()
-			.user(userId)
+			.member(memberId)
 			.token(token)
 			.expiredAt(expiredAt)
 			.tokenVersion(tokenVersion)
 			.build();
 	}
 
-	public static RefreshToken createRefreshToken(final User userId, final String token,
+	public static RefreshToken createRefreshToken(final Member memberId, final String token,
 		final Date expiredAt) {
-		return createRefreshToken(userId, token, expiredAt, 0);
+		return createRefreshToken(memberId, token, expiredAt, 0);
 	}
 
 	public void incrementTokenVersion() {
