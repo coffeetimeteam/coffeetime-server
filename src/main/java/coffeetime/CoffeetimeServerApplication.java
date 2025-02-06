@@ -8,7 +8,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableFeignClients
 public class CoffeetimeServerApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(CoffeetimeServerApplication.class, args);
-    }
+	public static void main(String[] args) {
+		SpringApplication.run(CoffeetimeServerApplication.class, args);
+	}
 }

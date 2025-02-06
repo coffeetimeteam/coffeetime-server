@@ -1,8 +1,8 @@
 package coffeetime.infrastructure;
 
 import coffeetime.controller.ServerAlertController;
+import coffeetime.domain.Member;
 import coffeetime.domain.RefreshToken;
-import coffeetime.domain.User;
 import coffeetime.domain.type.RoleType;
 import coffeetime.exception.CoffeeTimeException;
 import coffeetime.exception.EntryPayloadCode;
@@ -87,8 +87,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 			CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
 
 			Integer tokenVersion = claims.get("version", Integer.class);
-			RefreshToken latestRefreshToken = refreshTokenRepository.findLatestByUser(
-					customUserDetails.user())
+			RefreshToken latestRefreshToken = refreshTokenRepository.findLatestByMember(
+					customUserDetails.member())
 				.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN));
 
 			if (tokenVersion == null || !tokenVersion.equals(
@@ -108,7 +108,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 	private UserDetails createUserDetailsFromClaims(Claims claims) {
 		String[] subjectParts = extractSubjectParts(claims);
 		return new CustomUserDetails(
-			User.createUserFromClaims(
+			Member.createUserFromClaims(
 				Long.valueOf(subjectParts[0]),
 				subjectParts[1].trim(),
 				RoleType.valueOf((String) claims.get("role"))

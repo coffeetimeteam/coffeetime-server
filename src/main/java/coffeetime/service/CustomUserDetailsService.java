@@ -1,8 +1,8 @@
 package coffeetime.service;
 
-import coffeetime.domain.User;
+import coffeetime.domain.Member;
 import coffeetime.infrastructure.CustomUserDetails;
-import coffeetime.repository.UserRepository;
+import coffeetime.repository.MemberRepository;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,12 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class CustomUserDetailsService implements UserDetailsService {
 
 	@Autowired
-	UserRepository userRepository;
+	MemberRepository memberRepository;
 
 	@Override
 	@Transactional(readOnly = true)
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		Optional<User> findByUsername = userRepository.findByUsername(username);
+		Optional<Member> findByUsername = memberRepository.findByUsername(username);
 		if (findByUsername.isEmpty()) {
 			throw new UsernameNotFoundException("No user found with username");
 		}
