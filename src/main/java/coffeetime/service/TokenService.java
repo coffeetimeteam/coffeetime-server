@@ -5,9 +5,7 @@ import coffeetime.domain.RefreshToken;
 import coffeetime.dto.TokensResponse;
 import coffeetime.exception.CoffeeTimeException;
 import coffeetime.exception.EntryPayloadCode;
-import coffeetime.infrastructure.JwtTokenFilter;
 import coffeetime.infrastructure.JwtUtility;
-import coffeetime.repository.MemberRepository;
 import coffeetime.repository.RefreshTokenRepository;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class TokenService {
 
-	private final MemberRepository memberRepository;
-	private final JwtTokenFilter jwtTokenFilter;
-	private final MemberService memberService;
 	@Value("${token.jwt.refresh-token-expiration}")
 	private Integer refreshTokenExpiration;
 	private final RefreshTokenRepository refreshTokenRepository;
@@ -70,8 +65,8 @@ public class TokenService {
 	}
 
 	@Transactional
-	public TokensResponse renewalTokens(String bearerToken) {
-		final RefreshToken oldRefreshToken = getValidRefreshToken(bearerToken);
+	public TokensResponse renewalTokens(String token) {
+		final RefreshToken oldRefreshToken = getValidRefreshToken(token);
 		validateExpiration(oldRefreshToken, new Date());
 
 		final RefreshToken updatedRefreshToken = updateTokenVersion(oldRefreshToken);

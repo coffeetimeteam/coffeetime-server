@@ -9,6 +9,7 @@ import coffeetime.dto.MemberCreateRequest;
 import coffeetime.exception.CoffeeTimeException;
 import coffeetime.exception.EntryPayloadCode;
 import coffeetime.infrastructure.CustomUserDetails;
+import coffeetime.infrastructure.JwtUtility;
 import coffeetime.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -25,9 +26,10 @@ public class MemberService {
 	private final PasswordEncoder passwordEncoder;
 	private final DefaultNickname defaultNickname;
 	private final CustomUserDetailsService customUserDetailsService;
+	private final JwtUtility jwtUtility;
 
 	@Transactional(timeout = 10)
-	public GlobalResponse createUser(final MemberCreateRequest request) {
+	public GlobalResponse createMember(final MemberCreateRequest request) {
 		if (memberRepository.existsByUsername(request.getUsername())) {
 			throw new CoffeeTimeException(EntryPayloadCode.DUPLICATED_USER);
 		}
@@ -47,7 +49,10 @@ public class MemberService {
 	}
 
 	@Transactional(readOnly = true)
-	public Member getCurrentUser() {
+	public Member getCurrentMember(final String token) {
+		if (token.isEmpty()) {
+			throw new CoffeeTimeException(EntryPayloadCode.REQUIRED_TOKEN);
+		}
 		final CustomUserDetails customUserDetails = customUserDetailsService.getCurrentUserDetails();
 		final String username = customUserDetails.getUsername();
 		return memberRepository.findByUsername(username)
