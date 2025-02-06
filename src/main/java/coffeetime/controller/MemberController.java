@@ -3,8 +3,8 @@ package coffeetime.controller;
 import coffeetime.config.SecurityRequiredOperation;
 import coffeetime.domain.Member;
 import coffeetime.dto.GlobalResponse;
-import coffeetime.dto.UserCreateRequest;
-import coffeetime.dto.UserResponse;
+import coffeetime.dto.MemberCreateRequest;
+import coffeetime.dto.MemberResponse;
 import coffeetime.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +23,8 @@ public class MemberController {
 	private final MemberService memberService;
 
 	@PostMapping("/auth/signup")
-	public ResponseEntity<GlobalResponse> createUser(
-		@RequestBody @Valid final UserCreateRequest request
+	public ResponseEntity<GlobalResponse> createMember(
+		@RequestBody @Valid final MemberCreateRequest request
 	) {
 		final GlobalResponse response = memberService.createUser(request);
 		return ResponseEntity.ok().body(response);
@@ -32,9 +32,9 @@ public class MemberController {
 
 	@GetMapping("/my")
 	@SecurityRequiredOperation
-	public ResponseEntity<UserResponse> getUserInfo() {
+	public ResponseEntity<MemberResponse> getMemberInfo() {
 		final Member member = memberService.getCurrentUser();
-		final UserResponse response = new UserResponse(member.getId(), member.getUsername(),
+		final MemberResponse response = new MemberResponse(member.getId(), member.getUsername(),
 			member.getNickname(), member.getRole());
 		return ResponseEntity.ok().body(response);
 	}

@@ -5,7 +5,7 @@ import coffeetime.domain.Member;
 import coffeetime.domain.type.LoginType;
 import coffeetime.domain.type.RoleType;
 import coffeetime.dto.GlobalResponse;
-import coffeetime.dto.UserCreateRequest;
+import coffeetime.dto.MemberCreateRequest;
 import coffeetime.exception.CoffeeTimeException;
 import coffeetime.exception.EntryPayloadCode;
 import coffeetime.infrastructure.CustomUserDetails;
@@ -27,7 +27,7 @@ public class MemberService {
 	private final CustomUserDetailsService customUserDetailsService;
 
 	@Transactional(timeout = 10)
-	public GlobalResponse createUser(final UserCreateRequest request) {
+	public GlobalResponse createUser(final MemberCreateRequest request) {
 		if (memberRepository.existsByUsername(request.getUsername())) {
 			throw new CoffeeTimeException(EntryPayloadCode.DUPLICATED_USER);
 		}
@@ -36,7 +36,7 @@ public class MemberService {
 		}
 
 		memberRepository.save(
-			Member.createUser(
+			Member.create(
 				LoginType.EMAIL,
 				request.getUsername(),
 				defaultNickname.generate(),

@@ -10,7 +10,7 @@ import coffeetime.domain.Member;
 import coffeetime.domain.type.LoginType;
 import coffeetime.domain.type.RoleType;
 import coffeetime.dto.GlobalResponse;
-import coffeetime.dto.UserCreateRequest;
+import coffeetime.dto.MemberCreateRequest;
 import coffeetime.exception.EntryPayloadCode;
 import coffeetime.service.MemberService;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +47,7 @@ public class AuthenticationTests {
 
 	@BeforeEach
 	void setUp() {
-		UserCreateRequest request = new UserCreateRequest("auth@email.com", "password",
+		MemberCreateRequest request = new MemberCreateRequest("auth@email.com", "password",
 			"password");
 		Member mockMember = Member.createUser(
 			LoginType.EMAIL,
@@ -89,7 +89,7 @@ public class AuthenticationTests {
 			new UsernamePasswordAuthenticationToken(username, password)))
 			.thenReturn(mockAuthentication);
 
-		when(memberService.createUser(any(UserCreateRequest.class)))
+		when(memberService.createUser(any(MemberCreateRequest.class)))
 			.thenReturn(mockResponse);
 
 		// when

@@ -2,7 +2,7 @@ package coffeetime.dto;
 
 import coffeetime.domain.type.RoleType;
 
-public record UserResponse(
+public record MemberResponse(
 	Long id,
 	String username,
 	String nickname,

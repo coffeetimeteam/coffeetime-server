@@ -3,7 +3,7 @@ package coffeetime.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import coffeetime.domain.Coffee;
-import coffeetime.domain.User;
+import coffeetime.domain.Member;
 import coffeetime.domain.type.CoffeeType;
 import coffeetime.domain.type.LocationType;
 import coffeetime.domain.type.PriceType;
@@ -14,6 +14,7 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,21 +23,21 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class CoffeeRepositoryTests {
 
-	@Autowired
+	@Mock
 	private CoffeeRepository coffeeRepository;
 
 	@Autowired
-	private UserRepository userRepository;
+	private MemberRepository memberRepository;
 
-	private User testUser;
+	private Member testMember;
 	private Coffee testCoffee;
 
 	@BeforeEach
 	void setUp() {
-		testUser = userRepository.save(new User("test@email.com", "password"));
+		testMember = memberRepository.save(Member.createUserFromForm("test@email.com", "password"));
 
 		testCoffee = Coffee.create(
-			testUser,
+			testMember,
 			LocalDate.now(),
 			LocalTime.now(),
 			LocationType.HOME,
@@ -55,11 +56,11 @@ public class CoffeeRepositoryTests {
 		coffeeRepository.save(testCoffee);
 
 		// when
-		List<Coffee> coffees = coffeeRepository.findCoffeesByDate(testUser, LocalDate.now());
+		List<Coffee> coffees = coffeeRepository.findCoffeesByDate(testMember, LocalDate.now());
 
 		// then
 		assertThat(coffees).isNotEmpty();
-		assertThat(coffees.get(0).getUser().getId()).isEqualTo(testUser.getId());
+		assertThat(coffees.get(0).getMember().getId()).isEqualTo(testMember.getId());
 		assertThat(coffees.get(0).getRememberDate()).isEqualTo(LocalDate.now());
 	}
 } 

@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import coffeetime.dto.LoginRequest;
 import coffeetime.dto.RefreshTokenRequest;
 import coffeetime.dto.TokensResponse;
-import coffeetime.service.UserService;
+import coffeetime.service.MemberService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ public class SecurityTests {
 	private ObjectMapper objectMapper;
 
 	@Autowired
-	private UserService userService;
+	private MemberService memberService;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;

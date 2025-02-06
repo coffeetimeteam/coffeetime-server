@@ -108,7 +108,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 	private UserDetails createUserDetailsFromClaims(Claims claims) {
 		String[] subjectParts = extractSubjectParts(claims);
 		return new CustomUserDetails(
-			Member.createUserFromClaims(
+			Member.createFromClaims(
 				Long.valueOf(subjectParts[0]),
 				subjectParts[1].trim(),
 				RoleType.valueOf((String) claims.get("role"))

@@ -79,7 +79,7 @@ public class Member {
 		this.lastLoginDate = LocalDateTime.now();
 	}
 
-	public static Member createUser(final LoginType loginType, final String username,
+	public static Member create(final LoginType loginType, final String username,
 		final String nickname, final String password, final RoleType role) {
 		return Member.builder()
 			.loginType(loginType)
@@ -90,19 +90,12 @@ public class Member {
 			.build();
 	}
 
-	public static Member createUserFromClaims(final Long id,
+	public static Member createFromClaims(final Long id,
 		final String username, final RoleType role) {
 		return Member.builder()
 			.id(id)
 			.username(username)
 			.role(role)
-			.build();
-	}
-
-	public static Member createUserFromForm(final String username, final String password) {
-		return Member.builder()
-			.username(username)
-			.password(password)
 			.build();
 	}
 

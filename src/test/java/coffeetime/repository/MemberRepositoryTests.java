@@ -2,9 +2,9 @@ package coffeetime.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import coffeetime.domain.User;
-import coffeetime.dto.UserCreateRequest;
-import coffeetime.service.UserService;
+import coffeetime.domain.Member;
+import coffeetime.dto.MemberCreateRequest;
+import coffeetime.service.MemberService;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,33 +13,32 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
-public class UserRepositoryTests {
+public class MemberRepositoryTests {
 
 	@Autowired
-	private UserRepository userRepository;
+	private MemberRepository memberRepository;
 
 	@Autowired
-	private UserService userService;
+	private MemberService memberService;
 
 	@Test
 	public void testFindUserNotfound() {
-		Optional<User> findByUsername = userRepository.findByUsername("notfound@email.com");
-
+		Optional<Member> findByUsername = memberRepository.findByUsername("notfound@email.com");
 		assertThat(findByUsername).isNotPresent();
 	}
 
 	@Test
 	public void testFindUserFound() {
 		// given
-		UserCreateRequest request = new UserCreateRequest(
+		MemberCreateRequest request = new MemberCreateRequest(
 			"found@email.com",
 			"password",
 			"password"
 		);
-		userService.createUser(request);
+		memberService.createUser(request);
 
 		// when
-		Optional<User> foundUser = userRepository.findByUsername("found@email.com");
+		Optional<Member> foundUser = memberRepository.findByUsername("found@email.com");
 
 		// then
 		assertThat(foundUser).isPresent();
