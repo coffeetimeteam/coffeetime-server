@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import coffeetime.domain.User;
 import coffeetime.dto.LoginRequest;
 import coffeetime.dto.TokensResponse;
 import coffeetime.exception.CoffeeTimeException;
