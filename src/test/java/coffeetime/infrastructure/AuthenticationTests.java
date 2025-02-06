@@ -6,13 +6,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import coffeetime.domain.DefaultNickname;
-import coffeetime.domain.User;
+import coffeetime.domain.Member;
 import coffeetime.domain.type.LoginType;
 import coffeetime.domain.type.RoleType;
 import coffeetime.dto.GlobalResponse;
 import coffeetime.dto.UserCreateRequest;
 import coffeetime.exception.EntryPayloadCode;
-import coffeetime.service.UserService;
+import coffeetime.service.MemberService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,7 +34,7 @@ public class AuthenticationTests {
 	private AuthenticationManager authenticationManager;
 
 	@MockBean
-	private UserService userService;
+	private MemberService memberService;
 
 	@MockBean
 	private DefaultNickname defaultNickname;
@@ -49,13 +49,13 @@ public class AuthenticationTests {
 	void setUp() {
 		UserCreateRequest request = new UserCreateRequest("auth@email.com", "password",
 			"password");
-		User mockUser = User.createUser(
+		Member mockMember = Member.createUser(
 			LoginType.EMAIL,
 			request.getUsername(),
 			defaultNickname.generate(),
 			passwordEncoder.encode(request.getPassword()),
 			RoleType.GENERAL_USER);
-		mockUserDetails = new CustomUserDetails(mockUser);
+		mockUserDetails = new CustomUserDetails(mockMember);
 		mockUserDetails.getUsername();
 	}
 
@@ -89,7 +89,7 @@ public class AuthenticationTests {
 			new UsernamePasswordAuthenticationToken(username, password)))
 			.thenReturn(mockAuthentication);
 
-		when(userService.createUser(any(UserCreateRequest.class)))
+		when(memberService.createUser(any(UserCreateRequest.class)))
 			.thenReturn(mockResponse);
 
 		// when

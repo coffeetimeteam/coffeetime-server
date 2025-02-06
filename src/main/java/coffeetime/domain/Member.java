@@ -24,7 +24,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.springframework.data.annotation.LastModifiedDate;
 
 @Entity
-@Table(name = "\"user\"")
+@Table(name = "member")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql = "UPDATE user SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
@@ -33,7 +33,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 	parameters = @ParamDef(name = "isDeleted", type = Boolean.class)
 )
 @Filter(name = "deletedFilter", condition = "deleted_at IS NULL")
-public class User {
+public class Member {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -67,7 +67,7 @@ public class User {
 	private LocalDateTime deletedAt = null;
 
 	@Builder
-	private User(final Long id, final LoginType loginType, final String username,
+	private Member(final Long id, final LoginType loginType, final String username,
 		final String nickname, final String password, final RoleType role) {
 		this.id = id;
 		this.loginType = loginType;
@@ -79,9 +79,9 @@ public class User {
 		this.lastLoginDate = LocalDateTime.now();
 	}
 
-	public static User createUser(final LoginType loginType, final String username,
+	public static Member createUser(final LoginType loginType, final String username,
 		final String nickname, final String password, final RoleType role) {
-		return User.builder()
+		return Member.builder()
 			.loginType(loginType)
 			.username(username)
 			.nickname(nickname)
@@ -90,17 +90,17 @@ public class User {
 			.build();
 	}
 
-	public static User createUserFromClaims(final Long id,
+	public static Member createUserFromClaims(final Long id,
 		final String username, final RoleType role) {
-		return User.builder()
+		return Member.builder()
 			.id(id)
 			.username(username)
 			.role(role)
 			.build();
 	}
 
-	public static User createUserFromForm(final String username, final String password) {
-		return User.builder()
+	public static Member createUserFromForm(final String username, final String password) {
+		return Member.builder()
 			.username(username)
 			.password(password)
 			.build();

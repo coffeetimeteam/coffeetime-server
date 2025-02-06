@@ -1,14 +1,14 @@
 package coffeetime.service;
 
+import coffeetime.domain.Member;
 import coffeetime.domain.RefreshToken;
-import coffeetime.domain.User;
 import coffeetime.dto.TokensResponse;
 import coffeetime.exception.CoffeeTimeException;
 import coffeetime.exception.EntryPayloadCode;
 import coffeetime.infrastructure.JwtTokenFilter;
 import coffeetime.infrastructure.JwtUtility;
+import coffeetime.repository.MemberRepository;
 import coffeetime.repository.RefreshTokenRepository;
-import coffeetime.repository.UserRepository;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,25 +19,25 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class TokenService {
 
-	private final UserRepository userRepository;
+	private final MemberRepository memberRepository;
 	private final JwtTokenFilter jwtTokenFilter;
-	private final UserService userService;
+	private final MemberService memberService;
 	@Value("${token.jwt.refresh-token-expiration}")
 	private Integer refreshTokenExpiration;
 	private final RefreshTokenRepository refreshTokenRepository;
 	private final JwtUtility jwtUtility;
 
 	@Transactional
-	public TokensResponse generateTokens(User user) {
-		final RefreshToken latestToken = refreshTokenRepository.findLatestByUser(user)
+	public TokensResponse generateTokens(Member member) {
+		final RefreshToken latestToken = refreshTokenRepository.findLatestByMember(member)
 			.orElse(null);
 		final int newVersion = (latestToken != null) ? latestToken.getTokenVersion() + 1 : 0;
-		final String accessToken = jwtUtility.generateAccessToken(user, newVersion);
+		final String accessToken = jwtUtility.generateAccessToken(member, newVersion);
 		final String refreshToken = jwtUtility.generateRefreshToken();
 		final long refreshTokenExpirationMills =
 			System.currentTimeMillis() + refreshTokenExpiration * 60000L;
 		final RefreshToken newRefreshToken = RefreshToken.createRefreshToken(
-			user,
+			member,
 			refreshToken,
 			new Date(refreshTokenExpirationMills),
 			newVersion);
@@ -59,10 +59,10 @@ public class TokenService {
 		return refreshTokenRepository.save(refreshToken);
 	}
 
-	private RefreshToken createNewRefreshToken(User user, String token, int version) {
+	private RefreshToken createNewRefreshToken(Member member, String token, int version) {
 		final long expirationMills = System.currentTimeMillis() + refreshTokenExpiration * 60000L;
 		return RefreshToken.createRefreshToken(
-			user,
+			member,
 			token,
 			new Date(expirationMills),
 			version
@@ -76,13 +76,13 @@ public class TokenService {
 
 		final RefreshToken updatedRefreshToken = updateTokenVersion(oldRefreshToken);
 		final String accessToken = jwtUtility.generateAccessToken(
-			updatedRefreshToken.getUser(),
+			updatedRefreshToken.getMember(),
 			updatedRefreshToken.getTokenVersion()
 		);
 
 		final String newRefreshTokenValue = jwtUtility.generateRefreshToken();
 		final RefreshToken newRefreshToken = createNewRefreshToken(
-			updatedRefreshToken.getUser(),
+			updatedRefreshToken.getMember(),
 			newRefreshTokenValue,
 			updatedRefreshToken.getTokenVersion()
 		);
