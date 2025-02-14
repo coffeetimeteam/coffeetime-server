@@ -71,6 +71,12 @@ public class CoffeeController {
 		return ResponseEntity.ok().body(response);
 	}
 
+	@GetMapping("/{coffeeId}")
+	public ResponseEntity<CoffeeResponse> getCoffee(@PathVariable final Long coffeeId,
+		@RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+		final CoffeeResponse response = coffeeService.findCoffeeId(coffeeId, token);
+		return ResponseEntity.ok().body(response);
+	}
 
 	@PutMapping("/{coffeeId}")
 	public ResponseEntity<GlobalResponse> updateCoffee(
