@@ -17,7 +17,6 @@ import coffeetime.dto.CoffeeUpdateRequest;
 import coffeetime.dto.GlobalResponse;
 import coffeetime.exception.CoffeeTimeException;
 import coffeetime.exception.EntryPayloadCode;
-import coffeetime.exception.GlobalExceptionHandler;
 import coffeetime.repository.CoffeeRepository;
 import coffeetime.repository.ImageRepository;
 import java.time.LocalDate;
@@ -26,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,14 +37,12 @@ public class CoffeeService {
 	private final ImageRepository imageRepository;
 	private final ImageService imageService;
 	private final MemberService memberService;
-	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(
-		GlobalExceptionHandler.class);
 
 	@Transactional
 	public GlobalResponse createCoffee(final CoffeeCreateRequest request, final String token) {
-		final Member currentMember = memberService.getCurrentMember(token);
+		final Member member = memberService.getCurrentMember(token);
 		final Coffee saveCoffee = Coffee.create(
-			currentMember,
+			member,
 			request.rememberDate(),
 			request.rememberTime(),
 			LocationType.fromDisplayName(request.location()),
@@ -66,7 +62,7 @@ public class CoffeeService {
 
 	@Transactional(readOnly = true)
 	public CoffeeFormResponse getForm(final String token) {
-		final Member currentMember = memberService.getCurrentMember(token);
+		final Member member = memberService.getCurrentMember(token);
 		final List<String> locationList =
 			Arrays.stream(LocationType.values())
 				.map(LocationType::getLocation)
@@ -93,13 +89,21 @@ public class CoffeeService {
 			.build();
 	}
 
+	@Transactional
+	public CoffeeResponse findCoffeeId(final Long coffeeId, final String token) {
+		final Member member = memberService.getCurrentMember(token);
+		final Coffee coffee = coffeeRepository.findByIdAndMember(coffeeId, member)
+			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_COFFEE));
+		return CoffeeResponse.of(coffee, coffee.getImages().stream().map(Image::getUrl).toList());
+	}
+
 	@Transactional(readOnly = true)
 	public List<Map<String, Object>> findCoffeesByMonth(final Integer year,
 		final Integer month, final String token) {
-		final Member currentMember = memberService.getCurrentMember(token);
+		final Member member = memberService.getCurrentMember(token);
 		final LocalDate targetDate = (year == null || month == null) ? LocalDate.now() :
 			LocalDate.of(year, month, 1);
-		final List<Coffee> coffees = coffeeRepository.findCoffeesByMonth(currentMember,
+		final List<Coffee> coffees = coffeeRepository.findCoffeesByMonth(member,
 			targetDate.getYear(),
 			targetDate.getMonthValue());
 		final List<CoffeeResponse> coffeeResponses = CoffeeResponse.groupByMonth(coffees);
@@ -130,9 +134,9 @@ public class CoffeeService {
 	@Transactional(readOnly = true)
 	public List<CoffeeResponse> findCoffeesByDate(final LocalDate date, final String token) {
 		final LocalDate targetDate = date != null ? date : LocalDate.now();
-		final Member currentMember = memberService.getCurrentMember(token);
+		final Member member = memberService.getCurrentMember(token);
 		final List<Coffee> coffees = coffeeRepository.findCoffeesByDate(
-			currentMember, targetDate);
+			member, targetDate);
 		return coffees.stream()
 			.map(coffee -> {
 				List<String> imageUrls = coffee.getImages().stream()
@@ -146,8 +150,8 @@ public class CoffeeService {
 	@Transactional
 	public void updateCoffee(final Long coffeeId, final CoffeeUpdateRequest request,
 		final String token) {
-		final Member currentMember = memberService.getCurrentMember(token);
-		final Coffee coffee = coffeeRepository.findByIdAndMember(coffeeId, currentMember)
+		final Member member = memberService.getCurrentMember(token);
+		final Coffee coffee = coffeeRepository.findByIdAndMember(coffeeId, member)
 			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_COFFEE));
 		final List<String> currentImageUrls = coffee.getImages().stream()
 			.map(Image::getUrl)
@@ -179,8 +183,8 @@ public class CoffeeService {
 
 	@Transactional
 	public void deleteCoffee(final Long coffeeId, final String token) {
-		final Member currentMember = memberService.getCurrentMember(token);
-		final Coffee coffee = coffeeRepository.findByIdAndMember(coffeeId, currentMember)
+		final Member member = memberService.getCurrentMember(token);
+		final Coffee coffee = coffeeRepository.findByIdAndMember(coffeeId, member)
 			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_COFFEE));
 		try {
 			coffeeRepository.deleteById(coffee.getId());
