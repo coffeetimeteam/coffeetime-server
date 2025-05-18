@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -22,7 +21,6 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @RestControllerAdvice
-@ControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -33,7 +31,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ResponseBody
 	@ExceptionHandler(CoffeeTimeException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ErrorPayloadProvider handleCoffeeTimeException(HttpServletRequest request, CoffeeTimeException e) {
+	public ErrorPayloadProvider handleCoffeeTimeException(HttpServletRequest request,
+		CoffeeTimeException e) {
 		serverAlertController.sendServerAlertMessage(request, e);
 
 		LOGGER.error(e.getMessage(), e);
