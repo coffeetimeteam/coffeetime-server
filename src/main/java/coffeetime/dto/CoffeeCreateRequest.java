@@ -1,5 +1,8 @@
 package coffeetime.dto;
 
+import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNullElse;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
@@ -41,8 +44,11 @@ public record CoffeeCreateRequest(
 	@Max(value = 5, message = "점수는 5점 이하여야 합니다.")
 	int coffeeScore,
 
-	@Size(min = 0, max = 5, message = "이미지는 5장 이하로 가능합니다.")
+	@Size(max = 5, message = "이미지는 5장 이하로 가능합니다.")
 	List<MultipartFile> images
 ) {
 
+	public List<MultipartFile> images() {
+		return requireNonNullElse(images, emptyList());
+	}
 }

@@ -56,7 +56,9 @@ public class CoffeeService {
 		if (coffee.getId() == null) {
 			throw new CoffeeTimeException(EntryPayloadCode.FAIL_SAVE_COFFEE);
 		}
-		uploadImageFiles(coffee, request.images());
+		if (!request.images().isEmpty()) {
+			uploadImageFiles(coffee, request.images());
+		}
 		return new GlobalResponse(EntryPayloadCode.SUCCESS_CREATED);
 	}
 

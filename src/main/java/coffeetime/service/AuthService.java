@@ -22,8 +22,7 @@ public class AuthService {
 	@Transactional
 	public TokensResponse loginTokens(LoginRequest request) {
 		final Authentication authentication = authenticationManager.authenticate(
-			new UsernamePasswordAuthenticationToken(request.username(),
-				request.password())
+			new UsernamePasswordAuthenticationToken(request.username(), request.password())
 		);
 		final CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
