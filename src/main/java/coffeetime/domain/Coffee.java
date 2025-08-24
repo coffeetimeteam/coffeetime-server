@@ -18,7 +18,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -71,7 +70,7 @@ public class Coffee {
 	private Integer coffeeScore;
 
 	@OneToMany(mappedBy = "coffee", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Image> images = new ArrayList<>();
+	private List<Image> images;
 
 	@Builder
 	private Coffee(
