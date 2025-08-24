@@ -1,16 +1,22 @@
 package coffeetime.dto;
 
+import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNullElse;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 public record CoffeeUpdateRequest(
 	@NotNull(message = "수정할 날짜를 입력해주세요.")
 	LocalDate rememberDate,
@@ -45,4 +51,16 @@ public record CoffeeUpdateRequest(
 	List<MultipartFile> images
 ) {
 
+	@AssertTrue(message = "전체 이미지는 5장 이하로 가능합니다.")
+	private boolean isValidImageCount() {
+		return imageUrls().size() + images().size() < 6;
+	}
+
+	public List<String> imageUrls() {
+		return requireNonNullElse(imageUrls, emptyList());
+	}
+
+	public List<MultipartFile> images() {
+		return requireNonNullElse(images, emptyList());
+	}
 }

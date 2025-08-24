@@ -159,6 +159,7 @@ public class CoffeeService {
 		final Member member = memberService.getCurrentMember(token);
 		final Coffee coffee = coffeeRepository.findByIdAndMember(coffeeId, member)
 			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_COFFEE));
+
 		final List<String> currentImageUrls = coffee.getImages().stream()
 			.map(Image::getUrl)
 			.toList();
@@ -166,8 +167,9 @@ public class CoffeeService {
 		final List<String> imagesToDelete = currentImageUrls.stream()
 			.filter(url -> !requestImageUrls.contains(url))
 			.toList();
-		uploadImageFiles(coffee, request.images());
+
 		deleteImages(imagesToDelete);
+		uploadImageFiles(coffee, request.images());
 	}
 
 	private void uploadImageFiles(final Coffee coffee, final List<MultipartFile> images) {
