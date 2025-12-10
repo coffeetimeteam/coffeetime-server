@@ -2,7 +2,7 @@ name: Docker Build and Deploy
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "chore-47" ]
   pull_request:
     branches: [ "develop" ]
 
@@ -75,8 +75,5 @@ jobs:
           SECRET: ${{ secrets.SECRET }}
           ACCESS_TOKEN_TIME: ${{ secrets.ACCESS_TOKEN_TIME }}
           REFRESH_TOKEN_TIME: ${{ secrets.REFRESH_TOKEN_TIME }}
-          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
-          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-          S3_BUCKET: ${{ secrets.S3_BUCKET }}
         run: |
           sh /home/ubuntu/deploy.sh
