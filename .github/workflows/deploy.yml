@@ -60,7 +60,7 @@ jobs:
           build-args: |
             --no-cache
   docker-pull-and-run:
-    runs-on: [ self-hosted, ec2 ]
+    runs-on: [ self-hosted, oci ]
     if: ${{ needs.docker-buildx-and-push.result == 'success' }}
     needs: [ docker-buildx-and-push ]
     environment: prod
