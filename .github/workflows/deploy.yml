@@ -74,6 +74,11 @@ jobs:
           SECRET: ${{ secrets.SECRET }}
           ACCESS_TOKEN_TIME: ${{ secrets.ACCESS_TOKEN_TIME }}
           REFRESH_TOKEN_TIME: ${{ secrets.REFRESH_TOKEN_TIME }}
+          OCI_NAMESPACE: ${{ secrets.OCI_NAMESPACE }}
+          OCI_BUCKET: ${{ secrets.OCI_BUCKET }}
+          OCI_REGION: ${{ secrets.OCI_REGION }}
+          OCI_ACCESS_KEY: ${{ secrets.OCI_ACCESS_KEY }}
+          OCI_SECRET_KEY: ${{ secrets.OCI_SECRET_KEY }}
         run: |
           DB_HOST="${DB_HOST}" \
           DB_USERNAME="${DB_USERNAME}" \
@@ -83,4 +88,9 @@ jobs:
           SECRET="${SECRET}" \
           ACCESS_TOKEN_TIME="${ACCESS_TOKEN_TIME}" \
           REFRESH_TOKEN_TIME="${REFRESH_TOKEN_TIME}" \
+          OCI_NAMESPACE="${OCI_NAMESPACE}" \
+          OCI_BUCKET="${OCI_BUCKET}" \
+          OCI_REGION="${OCI_REGION}" \
+          OCI_ACCESS_KEY="${OCI_ACCESS_KEY}" \
+          OCI_SECRET_KEY="${OCI_SECRET_KEY}" \
           sh /home/ubuntu/deploy.sh

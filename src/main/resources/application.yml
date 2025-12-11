@@ -40,6 +40,14 @@ spring:
       max-request-size: 250MB
       resolve-lazily: true
 
+oci:
+  object-storage:
+    namespace: ${OCI_NAMESPACE}
+    bucket: ${OCI_BUCKET}
+    region: ${OCI_REGION}
+    access-key: ${OCI_ACCESS_KEY}
+    secret-key: ${OCI_SECRET_KEY}
+
 logging:
   discord:
     webhook-url: ${DISCORD_WEBHOOK}

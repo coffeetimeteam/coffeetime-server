@@ -39,6 +39,11 @@ public class Image {
 	@JoinColumn(name = "coffee_id", referencedColumnName = "id")
 	private Coffee coffee;
 
+	/**
+	 * Object Storage의 Object Key 저장
+	 * 형식: "coffee/uuid-timestamp.ext"
+	 * 예: "coffee/abc123-2024-01-01T12:00:00.jpg"
+	 */
 	@Column(nullable = false, unique = true)
 	private String url;
 

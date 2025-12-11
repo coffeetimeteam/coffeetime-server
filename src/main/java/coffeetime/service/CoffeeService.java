@@ -96,7 +96,13 @@ public class CoffeeService {
 		final Member member = memberService.getCurrentMember(token);
 		final Coffee coffee = coffeeRepository.findByIdAndMember(coffeeId, member)
 			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_COFFEE));
-		return CoffeeResponse.of(coffee, coffee.getImages().stream().map(Image::getUrl).toList());
+
+		// Image ID로 백엔드 API URL 생성
+		List<String> imageUrls = coffee.getImages().stream()
+			.map(image -> "/api/v1/images/" + image.getId())
+			.toList();
+
+		return CoffeeResponse.of(coffee, imageUrls);
 	}
 
 	@Transactional(readOnly = true)
@@ -141,8 +147,9 @@ public class CoffeeService {
 			member, targetDate);
 		return coffees.stream()
 			.map(coffee -> {
+				// Image ID로 백엔드 API URL 생성
 				List<String> imageUrls = coffee.getImages().stream()
-					.map(Image::getUrl)
+					.map(image -> "/api/v1/images/" + image.getId())
 					.toList();
 				return CoffeeResponse.of(coffee, imageUrls);
 			})

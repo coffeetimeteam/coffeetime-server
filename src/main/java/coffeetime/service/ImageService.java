@@ -26,17 +26,23 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 @Transactional
 public class ImageService {
 
-	@Value("${spring.cloud.aws.s3.bucket}")
+    private final S3Client s3Client;
+    private final ImageRepository imageRepository;
+    private final MemberService memberService;
+
+	@Value("${oci.object-storage.namespace}")
+	private String namespace;
+
+	@Value("${oci.object-storage.bucket}")
 	private String bucket;
 
-	private final S3Client s3Client;
-	private final ImageRepository imageRepository;
-	private final MemberService memberService;
+	@Value("${oci.object-storage.region}")
+	private String region;
 
-	private final String IMAGE_PREFIX = "coffee/";
+    private static final String IMAGE_PREFIX = "coffee/";
 
-	public List<String> uploadImages(List<MultipartFile> multipartFiles) {
-		List<CompletableFuture<String>> futures = multipartFiles.stream()
+	public List<String> uploadImages(final List<MultipartFile> multipartFiles) {
+		final List<CompletableFuture<String>> futures = multipartFiles.stream()
 			.map(this::uploadImageToBucketAsync).toList();
 		return futures.stream()
 			.map(CompletableFuture::join)
@@ -51,6 +57,7 @@ public class ImageService {
 		final ImageFile imageFile = new ImageFile(file);
 		final String objectKey = imageFile.getFilename();
 		final String contentType = getFileContentType(file);
+
 		try {
 			final PutObjectRequest putObjectRequest = PutObjectRequest.builder()
 				.bucket(bucket)
@@ -59,19 +66,26 @@ public class ImageService {
 				.build();
 			s3Client.putObject(putObjectRequest,
 				RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-			return getS3ObjectUrl(IMAGE_PREFIX + objectKey);
+			return getS3ObjectUrl(objectKey);
 		} catch (IOException e) {
 			throw new CoffeeTimeException(EntryPayloadCode.FAIL_IMAGE_UPLOAD);
 		}
 	}
 
+    private String getS3ObjectUrl(final String objectKey) {
+        // OCI Object Storage 직접 URL 생성
+        return String.format("https://%s.compat.objectstorage.%s.oraclecloud.com/%s/%s%s",
+                namespace, region, bucket, IMAGE_PREFIX, objectKey);
+    }
+
 	public CoffeeImageResponse findCoffeeImages(final String token) {
 		final Member member = memberService.getCurrentMember(token);
+        if (member.getId() == null) {
+            throw new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_IMAGE);
+        }
+
 		final List<Image> images = imageRepository.findByCoffee_Member(member);
 		final List<String> imageUrls = images.stream().map(Image::getUrl).toList();
-		if (member.getId() == null) {
-			throw new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_IMAGE);
-		}
 		return CoffeeImageResponse.getCoffeeImages(imageUrls);
 	}
 
@@ -94,6 +108,10 @@ public class ImageService {
 		}
 	}
 
+    private String extractObjectKey(String url) {
+        return url.substring(url.lastIndexOf("/") + 1);
+    }
+
 	private String getFileContentType(final MultipartFile file) {
 		final String originalFilename = file.getOriginalFilename();
 		final String contentType = file.getContentType();
@@ -101,15 +119,5 @@ public class ImageService {
 			return "image/heic";
 		}
 		return contentType != null ? contentType : "application/octet-stream";
-	}
-
-	private String getS3ObjectUrl(final String objectKey) {
-		return String.format("https://%s/%s",
-			bucket,
-			objectKey);
-	}
-
-	private String extractObjectKey(String url) {
-		return url.substring(url.lastIndexOf("/") + 1);
 	}
 }
