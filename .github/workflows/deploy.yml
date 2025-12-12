@@ -2,7 +2,7 @@ name: Docker Build and Deploy
 
 on:
   push:
-    branches: [ "chore-47" ]
+    branches: [ "develop" ]
   pull_request:
     branches: [ "develop" ]
 

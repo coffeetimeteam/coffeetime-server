@@ -1,5 +1,5 @@
 # build stage
-FROM eclipse-temurin:17-jdk-alpine AS build
+FROM eclipse-temurin:17-jdk AS build
 
 # install
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -32,7 +32,7 @@ COPY src /app/src
 RUN ./gradlew clean build -x test --no-daemon
 
 # runtime stage
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk
 
 # working dir
 WORKDIR /app
