@@ -93,13 +93,11 @@ public class CoffeeService {
 
 	@Transactional
 	public CoffeeResponse findCoffeeId(final Long coffeeId, final String token) {
-		final Member member = memberService.getCurrentMember(token);
-		final Coffee coffee = coffeeRepository.findByIdAndMember(coffeeId, member)
+		Member member = memberService.getCurrentMember(token);
+		Coffee coffee = coffeeRepository.findByIdAndMember(coffeeId, member)
 			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_COFFEE));
-
-		// Image ID로 백엔드 API URL 생성
 		List<String> imageUrls = coffee.getImages().stream()
-			.map(image -> "/api/v1/images/" + image.getId())
+			.map(Image::getUrl)
 			.toList();
 
 		return CoffeeResponse.of(coffee, imageUrls);
@@ -141,15 +139,14 @@ public class CoffeeService {
 
 	@Transactional(readOnly = true)
 	public List<CoffeeResponse> findCoffeesByDate(final LocalDate date, final String token) {
-		final LocalDate targetDate = date != null ? date : LocalDate.now();
-		final Member member = memberService.getCurrentMember(token);
-		final List<Coffee> coffees = coffeeRepository.findCoffeesByDate(
-			member, targetDate);
+		LocalDate targetDate = date != null ? date : LocalDate.now();
+		Member member = memberService.getCurrentMember(token);
+		List<Coffee> coffees = coffeeRepository.findCoffeesByDate(member, targetDate);
+
 		return coffees.stream()
 			.map(coffee -> {
-				// Image ID로 백엔드 API URL 생성
 				List<String> imageUrls = coffee.getImages().stream()
-					.map(image -> "/api/v1/images/" + image.getId())
+					.map(Image::getUrl)
 					.toList();
 				return CoffeeResponse.of(coffee, imageUrls);
 			})
