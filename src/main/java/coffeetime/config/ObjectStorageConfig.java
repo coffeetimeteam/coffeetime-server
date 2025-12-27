@@ -33,7 +33,7 @@ public class ObjectStorageConfig {
                 .credentialsProvider(StaticCredentialsProvider.create(
                         AwsBasicCredentials.create(accessKey, secretKey)
                 ))
-                .endpointOverride(URI.create("https://" + namespace + ".compat.objectstorage." + region + ".oraclecloud.com"))
+                .endpointOverride(URI.create("https://%s.compat.objectstorage.%s.oraclecloud.com".formatted(namespace, region))
                 .serviceConfiguration(S3Configuration.builder()
                                                      .pathStyleAccessEnabled(true)
                                                      .chunkedEncodingEnabled(false)
