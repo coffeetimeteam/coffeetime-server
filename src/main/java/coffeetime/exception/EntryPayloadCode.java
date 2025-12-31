@@ -30,6 +30,7 @@ public enum EntryPayloadCode {
 	FAIL_VALIDATE_TOKE(HttpStatus.UNAUTHORIZED, "토큰 유효성 검사 중 오류가 발생했습니다."),
 	NOT_ENOUGH_PERMISSION(HttpStatus.UNAUTHORIZED, "제한된 권한입니다."),
 	BAD_CREDENTIAL(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."),
+    FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 
 	BAD_FORM_DATA(HttpStatus.BAD_REQUEST, "잘못된 형식입니다."),
 

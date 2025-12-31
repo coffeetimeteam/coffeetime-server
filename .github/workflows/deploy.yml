@@ -57,10 +57,9 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/coffeetime:latest
-          build-args: |
-            --no-cache
+          no-cache: true
   docker-pull-and-run:
-    runs-on: [ self-hosted, ec2 ]
+    runs-on: [ self-hosted, oci ]
     if: ${{ needs.docker-buildx-and-push.result == 'success' }}
     needs: [ docker-buildx-and-push ]
     environment: prod
@@ -75,8 +74,23 @@ jobs:
           SECRET: ${{ secrets.SECRET }}
           ACCESS_TOKEN_TIME: ${{ secrets.ACCESS_TOKEN_TIME }}
           REFRESH_TOKEN_TIME: ${{ secrets.REFRESH_TOKEN_TIME }}
-          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
-          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          OCI_NAMESPACE: ${{ secrets.OCI_NAMESPACE }}
+          OCI_BUCKET: ${{ secrets.OCI_BUCKET }}
+          OCI_REGION: ${{ secrets.OCI_REGION }}
+          OCI_ACCESS_KEY: ${{ secrets.OCI_ACCESS_KEY }}
+          OCI_SECRET_KEY: ${{ secrets.OCI_SECRET_KEY }}
         run: |
+          DB_HOST="${DB_HOST}" \
+          DB_USERNAME="${DB_USERNAME}" \
+          DB_PASSWORD="${DB_PASSWORD}" \
+          DISCORD_WEBHOOK="${DISCORD_WEBHOOK}" \
+          ISSUER="${ISSUER}" \
+          SECRET="${SECRET}" \
+          ACCESS_TOKEN_TIME="${ACCESS_TOKEN_TIME}" \
+          REFRESH_TOKEN_TIME="${REFRESH_TOKEN_TIME}" \
+          OCI_NAMESPACE="${OCI_NAMESPACE}" \
+          OCI_BUCKET="${OCI_BUCKET}" \
+          OCI_REGION="${OCI_REGION}" \
+          OCI_ACCESS_KEY="${OCI_ACCESS_KEY}" \
+          OCI_SECRET_KEY="${OCI_SECRET_KEY}" \
           sh /home/ubuntu/deploy.sh
