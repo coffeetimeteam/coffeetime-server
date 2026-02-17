@@ -1,12 +1,12 @@
 package coffeetime.controller;
 
 import coffeetime.config.SecurityRequiredOperation;
-import coffeetime.dto.GlobalResponse;
-import coffeetime.dto.LoginRequest;
-import coffeetime.dto.TokensResponse;
-import coffeetime.exception.EntryPayloadCode;
-import coffeetime.service.AuthService;
-import coffeetime.service.TokenService;
+import coffeetime.controller.request.LoginRequest;
+import coffeetime.controller.response.GlobalResponse;
+import coffeetime.controller.response.TokensResponse;
+import coffeetime.domain.AuthService;
+import coffeetime.domain.TokenService;
+import coffeetime.support.error.EntryPayloadCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;

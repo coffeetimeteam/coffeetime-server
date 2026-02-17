@@ -1,10 +1,10 @@
 package coffeetime.controller;
 
+import coffeetime.controller.request.MemberCreateRequest;
+import coffeetime.controller.response.GlobalResponse;
+import coffeetime.controller.response.MemberResponse;
 import coffeetime.domain.Member;
-import coffeetime.dto.GlobalResponse;
-import coffeetime.dto.MemberCreateRequest;
-import coffeetime.dto.MemberResponse;
-import coffeetime.service.MemberService;
+import coffeetime.domain.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;

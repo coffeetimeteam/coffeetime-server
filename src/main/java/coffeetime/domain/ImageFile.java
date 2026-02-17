@@ -1,7 +1,7 @@
 package coffeetime.domain;
 
-import coffeetime.exception.CoffeeTimeException;
-import coffeetime.exception.EntryPayloadCode;
+import coffeetime.support.error.CoffeeTimeException;
+import coffeetime.support.error.EntryPayloadCode;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Getter;

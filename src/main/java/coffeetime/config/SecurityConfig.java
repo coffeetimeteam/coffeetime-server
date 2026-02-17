@@ -1,7 +1,7 @@
 package coffeetime.config;
 
-import coffeetime.infrastructure.JwtTokenFilter;
-import coffeetime.service.CustomUserDetailsService;
+import coffeetime.domain.CustomUserDetailsService;
+import coffeetime.support.auth.JwtTokenFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;

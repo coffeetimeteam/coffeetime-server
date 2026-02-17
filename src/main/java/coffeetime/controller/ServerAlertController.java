@@ -1,7 +1,7 @@
 package coffeetime.controller;
 
-import coffeetime.infrastructure.ServerAlertGenerator;
-import coffeetime.service.ServerAlertService;
+import coffeetime.domain.ServerAlertService;
+import coffeetime.support.auth.ServerAlertGenerator;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

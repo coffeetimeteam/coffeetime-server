@@ -5,14 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import coffeetime.controller.response.TokensResponse;
 import coffeetime.domain.Member;
 import coffeetime.domain.RefreshToken;
+import coffeetime.domain.TokenService;
 import coffeetime.domain.type.LoginType;
 import coffeetime.domain.type.RoleType;
-import coffeetime.dto.TokensResponse;
-import coffeetime.exception.CoffeeTimeException;
-import coffeetime.infrastructure.JwtUtility;
 import coffeetime.repository.RefreshTokenRepository;
+import coffeetime.support.auth.JwtUtility;
+import coffeetime.support.error.CoffeeTimeException;
 import java.util.Date;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;

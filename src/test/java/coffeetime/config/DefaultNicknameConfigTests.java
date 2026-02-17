@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import coffeetime.domain.DefaultNickname;
-import coffeetime.infrastructure.DefaultNicknameGenerator;
+import coffeetime.support.response.DefaultNicknameGenerator;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

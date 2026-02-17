@@ -1,12 +1,12 @@
 package coffeetime.controller;
 
-import coffeetime.dto.CoffeeCreateRequest;
-import coffeetime.dto.CoffeeFormResponse;
-import coffeetime.dto.CoffeeResponse;
-import coffeetime.dto.CoffeeUpdateRequest;
-import coffeetime.dto.GlobalResponse;
-import coffeetime.exception.EntryPayloadCode;
-import coffeetime.service.CoffeeService;
+import coffeetime.controller.request.CoffeeCreateRequest;
+import coffeetime.controller.request.CoffeeUpdateRequest;
+import coffeetime.controller.response.CoffeeFormResponse;
+import coffeetime.controller.response.CoffeeResponse;
+import coffeetime.controller.response.GlobalResponse;
+import coffeetime.domain.CoffeeService;
+import coffeetime.support.error.EntryPayloadCode;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;

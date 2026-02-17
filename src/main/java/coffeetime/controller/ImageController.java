@@ -1,8 +1,8 @@
 package coffeetime.controller;
 
 import coffeetime.config.SecurityRequiredOperation;
-import coffeetime.dto.CoffeeImageResponse;
-import coffeetime.service.ImageService;
+import coffeetime.controller.response.CoffeeImageResponse;
+import coffeetime.domain.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;

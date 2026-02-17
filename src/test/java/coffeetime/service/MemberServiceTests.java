@@ -2,8 +2,9 @@ package coffeetime.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import coffeetime.dto.GlobalResponse;
-import coffeetime.dto.MemberCreateRequest;
+import coffeetime.controller.request.MemberCreateRequest;
+import coffeetime.controller.response.GlobalResponse;
+import coffeetime.domain.MemberService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
