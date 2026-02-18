@@ -3,7 +3,6 @@ package coffeetime.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import coffeetime.controller.request.MemberCreateRequest;
-import coffeetime.domain.Member;
 import coffeetime.domain.MemberService;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -23,7 +22,8 @@ public class MemberRepositoryTests {
 
 	@Test
 	public void testFindUserNotfound() {
-		Optional<Member> findByUsername = memberRepository.findByUsername("notfound@email.com");
+		Optional<MemberEntity> findByUsername = memberRepository.findByUsername(
+			"notfound@email.com");
 		assertThat(findByUsername).isNotPresent();
 	}
 
@@ -38,7 +38,7 @@ public class MemberRepositoryTests {
 		memberService.createMember(request);
 
 		// when
-		Optional<Member> foundUser = memberRepository.findByUsername("found@email.com");
+		Optional<MemberEntity> foundUser = memberRepository.findByUsername("found@email.com");
 
 		// then
 		assertThat(foundUser).isPresent();

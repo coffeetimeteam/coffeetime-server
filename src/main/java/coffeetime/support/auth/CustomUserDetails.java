@@ -1,14 +1,15 @@
 package coffeetime.support.auth;
 
-import coffeetime.domain.Member;
+import coffeetime.repository.MemberEntity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public record CustomUserDetails(Member member) implements UserDetails {
+public record CustomUserDetails(MemberEntity member) implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -17,7 +18,7 @@ public record CustomUserDetails(Member member) implements UserDetails {
 		return authorities;
 	}
 
-	public Long getId() {
+	public UUID getId() {
 		return member.getId();
 	}
 

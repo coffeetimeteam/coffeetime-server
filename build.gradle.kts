@@ -1,6 +1,7 @@
 plugins {
     java
     kotlin("jvm") version "1.9.24"
+    kotlin("plugin.jpa") version "1.9.24"
     kotlin("plugin.spring") version "1.9.24"
     id("org.springframework.boot") version "3.3.1"
     id("io.spring.dependency-management") version "1.1.6"
@@ -51,7 +52,7 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")
 
-    implementation("com.nimbusds:nimbus-jose-jwt:9.47")
+    implementation("com.nimbusds:nimbus-jose-jwt:10.0.2")
 
     implementation("com.github.napstr:logback-discord-appender:1.0.0")
 
@@ -73,6 +74,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:testcontainers:1.19.2")
     testImplementation("com.h2database:h2")
+    testImplementation("io.mockk:mockk:1.2")
 }
 
 dependencyManagement {

@@ -13,6 +13,7 @@ import coffeetime.domain.AuthService;
 import coffeetime.domain.Member;
 import coffeetime.domain.MemberService;
 import coffeetime.domain.type.RoleType;
+import java.util.UUID;
 import coffeetime.support.auth.JwtUtility;
 import coffeetime.support.error.CoffeeTimeException;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,7 +67,8 @@ public class JwtUtilityTests {
 		TokensResponse tokensResponse = authService.loginTokens(loginRequest);
 		assertNotNull(tokensResponse, "tokensResponse should not be null");
 
-		Member member = Member.createFromClaims(1L, "test@email.com", RoleType.GENERAL_USER);
+		Member member = Member.createFromClaims(UUID.randomUUID(), "test@email.com",
+			RoleType.GENERAL_USER);
 		assertNotNull(member, "Member should not be null after login");
 
 		// when

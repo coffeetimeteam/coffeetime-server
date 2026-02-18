@@ -4,6 +4,7 @@ import coffeetime.controller.request.MemberCreateRequest;
 import coffeetime.controller.response.GlobalResponse;
 import coffeetime.domain.type.LoginType;
 import coffeetime.domain.type.RoleType;
+import coffeetime.repository.MemberEntity;
 import coffeetime.repository.MemberRepository;
 import coffeetime.support.auth.CustomUserDetails;
 import coffeetime.support.auth.JwtUtility;
@@ -35,14 +36,14 @@ public class MemberService {
 			throw new CoffeeTimeException(EntryPayloadCode.INVALID_PASSWORD);
 		}
 
-		memberRepository.save(
-			Member.create(
-				LoginType.EMAIL,
-				request.getUsername(),
-				defaultNickname.generate(),
-				passwordEncoder.encode(request.getPassword()),
-				RoleType.GENERAL_USER)
+		MemberEntity member = MemberEntity.create(
+			request.getUsername(),
+			LoginType.EMAIL,
+			defaultNickname.generate(),
+			passwordEncoder.encode(request.getPassword()),
+			RoleType.GENERAL_USER
 		);
+		memberRepository.save(member);
 		return new GlobalResponse(EntryPayloadCode.SUCCESS_REQUEST);
 	}
 
@@ -53,7 +54,11 @@ public class MemberService {
 		}
 		final CustomUserDetails customUserDetails = customUserDetailsService.getCurrentUserDetails();
 		final String username = customUserDetails.getUsername();
-		return memberRepository.findByUsername(username)
+		final MemberEntity member = memberRepository.findByUsername(username)
 			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_USER));
+
+		return new Member(member.getId(), member.getUsername(), member.getLoginType(),
+			member.getNickname(), member.getPassword(), member.getRole(), member.getCreatedAt(),
+			member.getUpdatedAt(), member.getLastLoginDate());
 	}
 }

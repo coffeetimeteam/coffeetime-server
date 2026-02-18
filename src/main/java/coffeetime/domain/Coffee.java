@@ -12,13 +12,12 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,9 +35,8 @@ public class Coffee {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne
-	@JoinColumn(name = "member_id", referencedColumnName = "id")
-	private Member member;
+	@Column(columnDefinition = "BINARY(16)", nullable = false)
+	private UUID memberId;
 
 	@Column(nullable = false)
 	private LocalDate rememberDate;
@@ -75,7 +73,7 @@ public class Coffee {
 	@Builder
 	private Coffee(
 		final Long id,
-		final Member member,
+		final UUID memberId,
 		final LocalDate rememberDate,
 		final LocalTime rememberTime,
 		final LocationType locationType,
@@ -87,7 +85,7 @@ public class Coffee {
 		final List<Image> images
 	) {
 		this.id = id;
-		this.member = member;
+		this.memberId = memberId;
 		this.rememberDate = rememberDate;
 		this.rememberTime = rememberTime;
 		this.locationType = locationType;
@@ -100,7 +98,7 @@ public class Coffee {
 	}
 
 	public static Coffee create(
-		final Member member,
+		final UUID memberId,
 		final LocalDate rememberDate,
 		final LocalTime rememberTime,
 		final LocationType locationType,
@@ -112,7 +110,7 @@ public class Coffee {
 		final List<Image> images
 	) {
 		return Coffee.builder()
-			.member(member)
+			.memberId(memberId)
 			.rememberDate(rememberDate)
 			.rememberTime(rememberTime)
 			.locationType(locationType)
@@ -123,5 +121,45 @@ public class Coffee {
 			.coffeeScore(coffeeScore)
 			.images(images)
 			.build();
+	}
+
+	public UUID getMemberId() {
+		return memberId;
+	}
+
+	public LocalDate getRememberDate() {
+		return rememberDate;
+	}
+
+	public LocalTime getRememberTime() {
+		return rememberTime;
+	}
+
+	public LocationType getLocationType() {
+		return locationType;
+	}
+
+	public CoffeeType getCoffeeType() {
+		return coffeeType;
+	}
+
+	public SizeType getSizeType() {
+		return sizeType;
+	}
+
+	public TasteType getTasteType() {
+		return tasteType;
+	}
+
+	public PriceType getPriceType() {
+		return priceType;
+	}
+
+	public Integer getCoffeeScore() {
+		return coffeeScore;
+	}
+
+	public List<Image> getImages() {
+		return images;
 	}
 }

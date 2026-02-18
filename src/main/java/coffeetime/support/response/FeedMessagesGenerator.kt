@@ -1,30 +1,29 @@
 package coffeetime.support.response;
 
-import coffeetime.domain.FeedMessages;
-import coffeetime.domain.type.CoffeeType;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
-import lombok.RequiredArgsConstructor;
+import coffeetime.domain.type.CoffeeType
+import java.util.concurrent.ThreadLocalRandom
 
-@RequiredArgsConstructor
-public class FeedMessagesGenerator implements FeedMessages {
+class FeedMessagesGenerator(
+    private val currentMessages: Map<Int, Map<CoffeeType, List<String>>>,
+    private val encouragementMessages: Map<Int, Map<CoffeeType, List<String>>>
+) {
+    fun getMessages(count: Int, coffeeType: CoffeeType?): Map<String, String> {
+        val resolvedCoffeType = coffeeType ?: listOf(CoffeeType.COFFEE, CoffeeType.NONE_COFFEE).random()
+        return mapOf(
+            "currentMessage" to getCurrentMessage(count, resolvedCoffeType),
+            "encouragementMessage" to getEncouragementMessage(count, resolvedCoffeType)
+        )
+    }
 
-	private final Map<Integer, Map<CoffeeType, List<String>>> currentMessages;
-	private final Map<Integer, Map<CoffeeType, List<String>>> encouragementMessages;
+    private fun getCurrentMessage(count: Int, coffeeType: CoffeeType): String {
+        val messages = currentMessages.getValue(count).getValue(coffeeType)
+        val random = ThreadLocalRandom.current()
+        return messages[random.nextInt(messages.size)]
+    }
 
-	@Override
-	public String getCurrentMessage(final Integer count, final CoffeeType coffeeType) {
-		final Random random = ThreadLocalRandom.current();
-		return currentMessages.get(random.nextInt(currentMessages.size())).get(coffeeType)
-			.get(count);
-	}
-
-	@Override
-	public String getEncouragementMessage(final Integer count, final CoffeeType coffeeType) {
-		final Random random = ThreadLocalRandom.current();
-		return encouragementMessages.get(random.nextInt(encouragementMessages.size()))
-			.get(coffeeType).get(count);
-	}
+    private fun getEncouragementMessage(count: Int, coffeeType: CoffeeType): String {
+        val messages = encouragementMessages.getValue(count).getValue(coffeeType)
+        val random = ThreadLocalRandom.current()
+        return messages[random.nextInt(messages.size)]
+    }
 }

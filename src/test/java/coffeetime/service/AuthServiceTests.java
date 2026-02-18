@@ -56,7 +56,7 @@ public class AuthServiceTests {
 	@Test
 	public void testLoginFailure() {
 		// given
-		LoginRequest request = new LoginRequest("wrong@email.com", "wrongpass");
+		LoginRequest request = new LoginRequest("wrong@email.com", "wrongPassword");
 
 		when(authenticationManager.authenticate(any()))
 			.thenThrow(new BadCredentialsException("Bad credentials"));

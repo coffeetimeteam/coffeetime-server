@@ -9,13 +9,13 @@ import coffeetime.controller.response.TokensResponse;
 import coffeetime.domain.Member;
 import coffeetime.domain.RefreshToken;
 import coffeetime.domain.TokenService;
-import coffeetime.domain.type.LoginType;
 import coffeetime.domain.type.RoleType;
 import coffeetime.repository.RefreshTokenRepository;
 import coffeetime.support.auth.JwtUtility;
 import coffeetime.support.error.CoffeeTimeException;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,14 +42,11 @@ public class TokenServiceTests {
 
 	@BeforeEach
 	void setUp() {
-		testMember = Member.builder()
-			.id(1L)
-			.loginType(LoginType.EMAIL)
-			.username("test@email.com")
-			.nickname("테스트유저")
-			.password("password")
-			.role(RoleType.GENERAL_USER)
-			.build();
+		testMember = Member.createFromClaims(
+			UUID.randomUUID(),
+			"test@email.com",
+			RoleType.GENERAL_USER
+		);
 
 		testAccessToken = jwtUtility.generateAccessToken(testMember, 0);
 		testRefreshToken = jwtUtility.generateRefreshToken();

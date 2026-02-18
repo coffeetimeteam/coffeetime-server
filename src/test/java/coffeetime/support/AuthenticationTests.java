@@ -8,10 +8,10 @@ import static org.mockito.Mockito.when;
 import coffeetime.controller.request.MemberCreateRequest;
 import coffeetime.controller.response.GlobalResponse;
 import coffeetime.domain.DefaultNickname;
-import coffeetime.domain.Member;
 import coffeetime.domain.MemberService;
 import coffeetime.domain.type.LoginType;
 import coffeetime.domain.type.RoleType;
+import coffeetime.repository.MemberEntity;
 import coffeetime.support.auth.CustomUserDetails;
 import coffeetime.support.error.EntryPayloadCode;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,9 +50,9 @@ public class AuthenticationTests {
 	void setUp() {
 		MemberCreateRequest request = new MemberCreateRequest("auth@email.com", "password",
 			"password");
-		Member mockMember = Member.create(
-			LoginType.EMAIL,
+		MemberEntity mockMember = MemberEntity.create(
 			request.getUsername(),
+			LoginType.EMAIL,
 			defaultNickname.generate(),
 			passwordEncoder.encode(request.getPassword()),
 			RoleType.GENERAL_USER);

@@ -2,6 +2,7 @@ package coffeetime.support.auth;
 
 import coffeetime.domain.Member;
 import coffeetime.domain.RefreshToken;
+import coffeetime.domain.type.RoleType;
 import coffeetime.repository.RefreshTokenRepository;
 import coffeetime.support.error.CoffeeTimeException;
 import coffeetime.support.error.EntryPayloadCode;
@@ -12,6 +13,7 @@ import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 import javax.crypto.spec.SecretKeySpec;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,14 +89,18 @@ public class JwtUtility {
 			if (tokenVersion == null) {
 				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
 			}
-			long userId;
+			UUID userId;
 			try {
-				userId = Long.parseLong(parts[0]);
-			} catch (NumberFormatException e) {
+				userId = UUID.fromString(parts[0]);
+			} catch (IllegalArgumentException e) {
 				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
 			}
 			final Optional<RefreshToken> latestToken = refreshTokenRepository.findLatestByMember(
-				Member.builder().id(userId).build()
+				Member.createFromClaims(
+					userId,
+					parts[1].trim(),
+					RoleType.valueOf((String) claims.get("role"))
+				)
 			);
 			if (latestToken.isEmpty() || !latestToken.get().getTokenVersion()
 				.equals(tokenVersion)) {

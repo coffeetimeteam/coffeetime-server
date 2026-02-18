@@ -1,9 +1,9 @@
 package coffeetime.support.auth;
 
 import coffeetime.controller.ServerAlertController;
-import coffeetime.domain.Member;
 import coffeetime.domain.RefreshToken;
 import coffeetime.domain.type.RoleType;
+import coffeetime.repository.MemberEntity;
 import coffeetime.repository.RefreshTokenRepository;
 import coffeetime.support.error.CoffeeTimeException;
 import coffeetime.support.error.EntryPayloadCode;
@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
@@ -88,7 +89,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
 			Integer tokenVersion = claims.get("version", Integer.class);
 			RefreshToken latestRefreshToken = refreshTokenRepository.findLatestByMember(
-					customUserDetails.member())
+					customUserDetails.member.getId())
 				.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN));
 
 			if (tokenVersion == null || !tokenVersion.equals(
@@ -108,8 +109,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 	private UserDetails createUserDetailsFromClaims(Claims claims) {
 		String[] subjectParts = extractSubjectParts(claims);
 		return new CustomUserDetails(
-			Member.createFromClaims(
-				Long.valueOf(subjectParts[0]),
+			MemberEntity.createFromClaims(
+				UUID.fromString(subjectParts[0].trim()),
 				subjectParts[1].trim(),
 				RoleType.valueOf((String) claims.get("role"))
 			)

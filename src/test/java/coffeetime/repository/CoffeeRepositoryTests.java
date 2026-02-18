@@ -3,18 +3,19 @@ package coffeetime.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import coffeetime.domain.Coffee;
-import coffeetime.domain.Member;
 import coffeetime.domain.type.CoffeeType;
 import coffeetime.domain.type.LocationType;
+import coffeetime.domain.type.LoginType;
 import coffeetime.domain.type.PriceType;
+import coffeetime.domain.type.RoleType;
 import coffeetime.domain.type.SizeType;
 import coffeetime.domain.type.TasteType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,21 +24,29 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class CoffeeRepositoryTests {
 
-	@Mock
+	@Autowired
 	private CoffeeRepository coffeeRepository;
 
 	@Autowired
 	private MemberRepository memberRepository;
 
-	private Member testMember;
+	private UUID testMemberId;
 	private Coffee testCoffee;
 
 	@BeforeEach
 	void setUp() {
-		testMember = memberRepository.save(Member.createUserFromForm("test@email.com", "password"));
+		MemberEntity savedMember = memberRepository.save(
+			MemberEntity.create(
+				"test@email.com",
+				LoginType.EMAIL,
+				"tester",
+				"password",
+				RoleType.GENERAL_USER
+			));
+		testMemberId = savedMember.getId();
 
 		testCoffee = Coffee.create(
-			testMember,
+			testMemberId,
 			LocalDate.now(),
 			LocalTime.now(),
 			LocationType.HOME,
@@ -56,11 +65,11 @@ public class CoffeeRepositoryTests {
 		coffeeRepository.save(testCoffee);
 
 		// when
-		List<Coffee> coffees = coffeeRepository.findCoffeesByDate(testMember, LocalDate.now());
+		List<Coffee> coffees = coffeeRepository.findCoffeesByDate(testMemberId, LocalDate.now());
 
 		// then
 		assertThat(coffees).isNotEmpty();
-		assertThat(coffees.get(0).getMember().getId()).isEqualTo(testMember.getId());
+		assertThat(coffees.get(0).getMemberId()).isEqualTo(testMemberId);
 		assertThat(coffees.get(0).getRememberDate()).isEqualTo(LocalDate.now());
 	}
-} 
+}

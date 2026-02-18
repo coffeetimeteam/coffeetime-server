@@ -39,7 +39,7 @@ public class CoffeeService {
 	public GlobalResponse createCoffee(final CoffeeCreateRequest request, final String token) {
 		final Member member = memberService.getCurrentMember(token);
 		final Coffee saveCoffee = Coffee.create(
-			member,
+			member.getId(),
 			request.rememberDate(),
 			request.rememberTime(),
 			LocationType.fromDisplayName(request.location()),
@@ -90,10 +90,10 @@ public class CoffeeService {
 
 	@Transactional
 	public CoffeeResponse findCoffeeId(final Long coffeeId, final String token) {
-		Member member = memberService.getCurrentMember(token);
-		Coffee coffee = coffeeRepository.findByIdAndMember(coffeeId, member)
+		final Member member = memberService.getCurrentMember(token);
+		final Coffee coffee = coffeeRepository.findByIdAndMemberId(coffeeId, member.getId())
 			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_COFFEE));
-		List<String> imageUrls = coffee.getImages().stream()
+		final List<String> imageUrls = coffee.getImages().stream()
 			.map(Image::getUrl)
 			.toList();
 
@@ -106,7 +106,7 @@ public class CoffeeService {
 		final Member member = memberService.getCurrentMember(token);
 		final LocalDate targetDate = (year == null || month == null) ? LocalDate.now() :
 			LocalDate.of(year, month, 1);
-		final List<Coffee> coffees = coffeeRepository.findCoffeesByMonth(member,
+		final List<Coffee> coffees = coffeeRepository.findCoffeesByMonth(member.getId(),
 			targetDate.getYear(),
 			targetDate.getMonthValue());
 		final List<CoffeeResponse> coffeeResponses = CoffeeResponse.groupByMonth(coffees);
@@ -138,7 +138,7 @@ public class CoffeeService {
 	public List<CoffeeResponse> findCoffeesByDate(final LocalDate date, final String token) {
 		LocalDate targetDate = date != null ? date : LocalDate.now();
 		Member member = memberService.getCurrentMember(token);
-		List<Coffee> coffees = coffeeRepository.findCoffeesByDate(member, targetDate);
+		List<Coffee> coffees = coffeeRepository.findCoffeesByDate(member.getId(), targetDate);
 
 		return coffees.stream()
 			.map(coffee -> {
@@ -154,7 +154,7 @@ public class CoffeeService {
 	public void updateCoffee(final Long coffeeId, final CoffeeUpdateRequest request,
 		final String token) {
 		final Member member = memberService.getCurrentMember(token);
-		final Coffee coffee = coffeeRepository.findByIdAndMember(coffeeId, member)
+		final Coffee coffee = coffeeRepository.findByIdAndMemberId(coffeeId, member.getId())
 			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_COFFEE));
 		final List<String> currentImageUrls = coffee.getImages().stream()
 			.map(Image::getUrl)
@@ -187,7 +187,7 @@ public class CoffeeService {
 	@Transactional
 	public void deleteCoffee(final Long coffeeId, final String token) {
 		final Member member = memberService.getCurrentMember(token);
-		final Coffee coffee = coffeeRepository.findByIdAndMember(coffeeId, member)
+		final Coffee coffee = coffeeRepository.findByIdAndMemberId(coffeeId, member.getId())
 			.orElseThrow(() -> new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_COFFEE));
 		try {
 			coffeeRepository.deleteById(coffee.getId());

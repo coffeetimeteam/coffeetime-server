@@ -1,9 +1,9 @@
 package coffeetime.repository;
 
-import coffeetime.domain.Member;
 import coffeetime.domain.RefreshToken;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -22,7 +22,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Inte
 	@Query("delete from RefreshToken rt where rt.expiredAt <= current_timestamp")
 	int deleteByExpiredAt();
 
-	@Query(value = "select rt from RefreshToken rt where rt.member = :member order by rt.id desc "
+	@Query(value = "select rt from RefreshToken rt where rt.member = :memberId order by rt.id desc "
 		+ "limit 1")
-	Optional<RefreshToken> findLatestByMember(@Param("member") Member member);
+	Optional<RefreshToken> findLatestByMember(@Param("memberId") UUID memberId);
 }

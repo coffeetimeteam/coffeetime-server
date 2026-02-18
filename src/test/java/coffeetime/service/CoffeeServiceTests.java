@@ -11,17 +11,21 @@ import coffeetime.domain.Coffee;
 import coffeetime.domain.CoffeeService;
 import coffeetime.domain.ImageService;
 import coffeetime.domain.Member;
-import coffeetime.domain.MemberService;
 import coffeetime.domain.type.CoffeeType;
 import coffeetime.domain.type.LocationType;
 import coffeetime.domain.type.PriceType;
+import coffeetime.domain.type.RoleType;
 import coffeetime.domain.type.SizeType;
 import coffeetime.domain.type.TasteType;
+import coffeetime.repository.MemberRepository;
+import coffeetime.support.auth.JwtUtility;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -33,21 +37,30 @@ import org.springframework.web.multipart.MultipartFile;
 @Transactional
 public class CoffeeServiceTests {
 
+	@Mock
+	private MemberRepository memberRepository;
+
 	@Autowired
 	private CoffeeService coffeeService;
 
 	@Autowired
-	private MemberService memberService;
+	private JwtUtility jwtUtility;
 
 	@MockBean
 	private ImageService imageService;
 
 	private Member testMember;
-	private CoffeeCreateRequest testRequest;
+	private String testAccessToken;
 
 	@BeforeEach
 	void setUp() {
-		testMember = memberService.getCurrentUser();
+		testMember = Member.createFromClaims(
+			UUID.randomUUID(),
+			"username@test.com",
+			RoleType.GENERAL_USER
+		);
+
+		testAccessToken = jwtUtility.generateAccessToken(testMember, 0);
 	}
 
 	@Test
@@ -58,7 +71,7 @@ public class CoffeeServiceTests {
 			"image/jpeg",
 			"test image content".getBytes()
 		);
-		testRequest = new CoffeeCreateRequest(
+		CoffeeCreateRequest testRequest = new CoffeeCreateRequest(
 			LocalDate.now(),
 			LocalTime.now(),
 			"회사",
@@ -73,7 +86,7 @@ public class CoffeeServiceTests {
 		// when
 		when(imageService.uploadImages(any()))
 			.thenReturn(List.of("test-image-key"));
-		GlobalResponse response = coffeeService.createCoffee(testRequest);
+		GlobalResponse response = coffeeService.createCoffee(testRequest, testAccessToken);
 
 		// then
 		assertThat(response.getStatus()).isEqualTo(200);
@@ -83,7 +96,7 @@ public class CoffeeServiceTests {
 	public void testGetCoffeesByDate() {
 		// given
 		Coffee coffee = Coffee.create(
-			testMember,
+			testMember.getId(),
 			LocalDate.now(),
 			LocalTime.now(),
 			LocationType.HOME,
@@ -96,7 +109,8 @@ public class CoffeeServiceTests {
 		);
 
 		// when
-		List<CoffeeResponse> responses = coffeeService.findCoffeesByDate(LocalDate.now());
+		List<CoffeeResponse> responses = coffeeService.findCoffeesByDate(LocalDate.now(),
+			testAccessToken);
 
 		// then
 		assertThat(responses).isNotNull();

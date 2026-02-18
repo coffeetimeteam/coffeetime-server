@@ -1,5 +1,6 @@
 package coffeetime.domain;
 
+import coffeetime.repository.MemberEntity;
 import coffeetime.repository.MemberRepository;
 import coffeetime.support.auth.CustomUserDetails;
 import java.util.Optional;
@@ -20,7 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 	@Override
 	@Transactional(readOnly = true)
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		Optional<Member> findByUsername = memberRepository.findByUsername(username);
+		Optional<MemberEntity> findByUsername = memberRepository.findByUsername(username);
 		if (findByUsername.isEmpty()) {
 			throw new UsernameNotFoundException("No user found with username");
 		}

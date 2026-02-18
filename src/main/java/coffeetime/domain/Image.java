@@ -74,5 +74,8 @@ public class Image {
 				.build())
 			.collect(Collectors.toList());
 	}
-}
 
+	public String getUrl() {
+		return url;
+	}
+}

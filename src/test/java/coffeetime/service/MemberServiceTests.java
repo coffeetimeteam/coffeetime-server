@@ -27,7 +27,7 @@ public class MemberServiceTests {
 		);
 
 		// when
-		GlobalResponse globalResponse = memberService.createUser(request);
+		GlobalResponse globalResponse = memberService.createMember(request);
 
 		// then
 		assertThat(globalResponse.getStatus()).isEqualTo(200);
