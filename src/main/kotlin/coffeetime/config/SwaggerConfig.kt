@@ -7,17 +7,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class SwaggerConfig {
+class SwaggerConfig {
 
 	@Bean
-	public OpenAPI openAPI() {
-		return new OpenAPI()
-			.components(new Components())
+	fun openAPI(): OpenAPI {
+		return OpenAPI()
+			.components(Components())
 			.info(apiInfo());
 	}
 
-	private Info apiInfo() {
-		return new Info()
+	private fun apiInfo(): Info {
+		return Info()
 			.title("CoffeeTime API Document")
 			.description("CoffeeTime API 문서입니다.")
 			.version("1.0.0");
