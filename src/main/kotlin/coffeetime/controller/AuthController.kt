@@ -2,7 +2,7 @@ package coffeetime.controller;
 
 import coffeetime.config.SecurityRequiredOperation;
 import coffeetime.controller.request.LoginRequest;
-import coffeetime.controller.response.GlobalResponse;
+import coffeetime.support.response.GlobalResponse;
 import coffeetime.controller.response.TokensResponse;
 import coffeetime.domain.AuthService;
 import coffeetime.domain.TokenService;

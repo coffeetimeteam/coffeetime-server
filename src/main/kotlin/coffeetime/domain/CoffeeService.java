@@ -6,7 +6,7 @@ import coffeetime.controller.request.CoffeeCreateRequest;
 import coffeetime.controller.request.CoffeeUpdateRequest;
 import coffeetime.controller.response.CoffeeFormResponse;
 import coffeetime.controller.response.CoffeeResponse;
-import coffeetime.controller.response.GlobalResponse;
+import coffeetime.support.response.GlobalResponse;
 import coffeetime.domain.type.CoffeeType;
 import coffeetime.domain.type.LocationType;
 import coffeetime.domain.type.PriceType;

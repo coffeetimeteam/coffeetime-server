@@ -1,54 +1,38 @@
 package coffeetime.support.auth;
 
-import coffeetime.repository.MemberEntity;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import coffeetime.repository.UserEntity;
 import java.util.UUID;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public record CustomUserDetails(MemberEntity member) implements UserDetails {
+data class CustomUserDetails(
+	val user: UserEntity
+): UserDetails {
 
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-		authorities.add(new SimpleGrantedAuthority(member.getRole().toString()));
-		return authorities;
+	override fun getAuthorities(): Collection<GrantedAuthority> = listOf(
+		SimpleGrantedAuthority(user.role.toString())
+	)
+
+	fun getId(): UUID = user.id
+
+	override fun getUsername(): String = user.username
+
+	override fun getPassword(): String = user.password
+
+	override fun isAccountNonExpired(): Boolean {
+		return super.isAccountNonExpired()
 	}
 
-	public UUID getId() {
-		return member.getId();
+	override fun isAccountNonLocked(): Boolean {
+		return super.isAccountNonLocked()
 	}
 
-	@Override
-	public String getUsername() {
-		return member.getUsername();
+	override fun isCredentialsNonExpired(): Boolean {
+		return super.isCredentialsNonExpired()
 	}
 
-	@Override
-	public String getPassword() {
-		return member.getPassword();
-	}
-
-	@Override
-	public boolean isAccountNonExpired() {
-		return UserDetails.super.isAccountNonExpired();
-	}
-
-	@Override
-	public boolean isAccountNonLocked() {
-		return UserDetails.super.isAccountNonLocked();
-	}
-
-	@Override
-	public boolean isCredentialsNonExpired() {
-		return UserDetails.super.isCredentialsNonExpired();
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return UserDetails.super.isEnabled();
+	override fun isEnabled(): Boolean {
+		return super.isEnabled()
 	}
 }

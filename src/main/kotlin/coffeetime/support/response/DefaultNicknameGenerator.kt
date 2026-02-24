@@ -1,22 +1,21 @@
-package coffeetime.support.response;
+package coffeetime.support.response
 
-import coffeetime.domain.DefaultNickname;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
-import lombok.RequiredArgsConstructor;
+import coffeetime.domain.DefaultNickname
+import java.util.List
+import java.util.Random
+import java.util.concurrent.ThreadLocalRandom
+import lombok.RequiredArgsConstructor
 
 @RequiredArgsConstructor
-public class DefaultNicknameGenerator implements DefaultNickname {
+class DefaultNicknameGenerator(
+	private val adjectives: List<String>,
+	private val nouns: List<String>
+): DefaultNickname {
 
-	private final List<String> adjectives;
-	private final List<String> nouns;
-
-	@Override
-	public String generate() {
-		Random random = ThreadLocalRandom.current();
-		String adjective = adjectives.get(random.nextInt(adjectives.size()));
-		String noun = nouns.get(random.nextInt(nouns.size()));
-		return adjective + " " + noun;
+	override fun generate(): String {
+		val random = ThreadLocalRandom.current()
+		val adjective = adjectives[random.nextInt(adjectives.size)]
+		val noun = nouns[random.nextInt(nouns.size)]
+		return "$adjective $noun"
 	}
 }
