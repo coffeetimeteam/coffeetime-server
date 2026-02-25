@@ -1,6 +1,6 @@
 package coffeetime.repository
 
-import coffeetime.domain.type.StatusType
+import coffeetime.enums.StatusType
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp

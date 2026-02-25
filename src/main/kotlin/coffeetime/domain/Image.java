@@ -1,6 +1,6 @@
 package coffeetime.domain;
 
-import coffeetime.domain.type.StatusType;
+import coffeetime.enums.StatusType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

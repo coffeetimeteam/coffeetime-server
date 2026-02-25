@@ -1,10 +1,10 @@
 package coffeetime.domain;
 
-import coffeetime.domain.type.CoffeeType;
-import coffeetime.domain.type.LocationType;
-import coffeetime.domain.type.PriceType;
-import coffeetime.domain.type.SizeType;
-import coffeetime.domain.type.TasteType;
+import coffeetime.enums.CoffeeType;
+import coffeetime.enums.LocationType;
+import coffeetime.enums.PriceType;
+import coffeetime.enums.SizeType;
+import coffeetime.enums.TasteType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
