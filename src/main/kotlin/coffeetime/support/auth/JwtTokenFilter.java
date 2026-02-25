@@ -2,7 +2,7 @@ package coffeetime.support.auth;
 
 import coffeetime.controller.ServerAlertController;
 import coffeetime.domain.RefreshToken;
-import coffeetime.domain.type.RoleType;
+import coffeetime.enums.RoleType;
 import coffeetime.repository.MemberEntity;
 import coffeetime.repository.RefreshTokenRepository;
 import coffeetime.support.error.CoffeeTimeException;

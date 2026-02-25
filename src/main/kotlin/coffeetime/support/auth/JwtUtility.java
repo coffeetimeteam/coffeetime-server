@@ -2,7 +2,7 @@ package coffeetime.support.auth;
 
 import coffeetime.domain.Member;
 import coffeetime.domain.RefreshToken;
-import coffeetime.domain.type.RoleType;
+import coffeetime.enums.RoleType;
 import coffeetime.repository.RefreshTokenRepository;
 import coffeetime.support.error.CoffeeTimeException;
 import coffeetime.support.error.EntryPayloadCode;

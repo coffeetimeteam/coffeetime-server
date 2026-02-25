@@ -1,6 +1,6 @@
 package coffeetime.domain;
 
-import coffeetime.domain.type.CoffeeType;
+import coffeetime.enums.CoffeeType;
 
 public interface FeedMessages {
 

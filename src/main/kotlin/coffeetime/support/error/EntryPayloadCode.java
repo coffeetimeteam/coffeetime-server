@@ -8,8 +8,9 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum EntryPayloadCode {
 	SUCCESS_REQUEST(HttpStatus.OK, "성공한 요청입니다."),
-	SUCCESS_LOGOUT(HttpStatus.OK, "로그아웃에 성공했습니다."),
+	BAD_REQUEST(HttpStatus.BAD_REQUEST, "요청이 올바르지 않습니다."),
 
+	SUCCESS_LOGOUT(HttpStatus.OK, "로그아웃에 성공했습니다."),
 	SUCCESS_CREATED(HttpStatus.CREATED, "생성에 성공했습니다."),
 
 	DUPLICATED_USER(HttpStatus.CONFLICT, "이미 가입한 회원입니다."),
@@ -31,8 +32,6 @@ public enum EntryPayloadCode {
 	NOT_ENOUGH_PERMISSION(HttpStatus.UNAUTHORIZED, "제한된 권한입니다."),
 	BAD_CREDENTIAL(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."),
 	FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
-
-	BAD_FORM_DATA(HttpStatus.BAD_REQUEST, "잘못된 형식입니다."),
 
 	FAIL_FEED_MESSAGES(HttpStatus.INTERNAL_SERVER_ERROR, "메세지 생성에 실패했습니다."),
 	NOT_FOUND_AUTH(HttpStatus.INTERNAL_SERVER_ERROR, "시큐리티 인증 정보가 없습니다"),

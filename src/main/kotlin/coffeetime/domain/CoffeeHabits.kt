@@ -1,6 +1,11 @@
 package coffeetime.domain
 
 import coffeetime.domain.type.*
+import coffeetime.enums.CoffeeType
+import coffeetime.enums.LocationType
+import coffeetime.enums.PriceType
+import coffeetime.enums.SizeType
+import coffeetime.enums.TasteType
 
 data class CoffeeHabits(
     val favoriteLocation: LocationType? = null,
