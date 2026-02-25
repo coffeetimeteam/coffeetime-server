@@ -1,129 +1,89 @@
-package coffeetime.support.auth;
+package coffeetime.support.auth
 
-import coffeetime.domain.Member;
-import coffeetime.domain.RefreshToken;
-import coffeetime.enums.RoleType;
-import coffeetime.repository.RefreshTokenRepository;
-import coffeetime.support.error.CoffeeTimeException;
-import coffeetime.support.error.EntryPayloadCode;
-import coffeetime.support.error.JwtValidationException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
-import javax.crypto.spec.SecretKeySpec;
-import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import coffeetime.domain.User
+import coffeetime.repository.RefreshTokenRepository
+import coffeetime.support.error.CoffeeTimeException
+import coffeetime.support.error.EntryPayloadCode
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.security.Keys
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
+import java.nio.charset.StandardCharsets
+import java.util.*
 
 @Component
-@Getter
-public class JwtUtility {
+class JwtUtility(
+    @param:Value("\${token.jwt.issuer}")
+    private val tokenIssuer: String,
+    @param:Value("\${token.jwt.secret}")
+    private val secretKey: String,
+    @param:Value("\${token.jwt.access-token-expiration}")
+    private val accessTokenExpiration: Int,
+    @param:Value("\${token.jwt.refresh-token-expiration}")
+    private val refreshTokenExpiration: Int,
+    private val refreshTokenRepository: RefreshTokenRepository
+) {
 
-	@Value("${token.jwt.issuer}")
-	private String tokenIssuer;
+    fun createAccessToken(
+        user: User,
+        tokenVersion: Int
+    ): String {
+        val subject = String.format("%s, %s", user.id, user.username)
+        return createToken(subject, accessTokenExpiration, user.role.name, tokenVersion)
+    }
 
-	@Value("${token.jwt.secret}")
-	private String secretKey;
+    fun createRefreshToken(): String {
+        return createToken("", refreshTokenExpiration, "", 0)
+    }
 
-	@Value("${token.jwt.access-token-expiration}")
-	private Integer accessTokenExpiration;
+    private fun createToken(
+        subject: String,
+        expirationMinutes: Int,
+        role: String,
+        version: Int
+    ): String {
+        val expirationTimeInMillis = System.currentTimeMillis() + expirationMinutes * 60 * 1000
+        return Jwts.builder()
+            .subject(subject)
+            .issuer(tokenIssuer)
+            .issuedAt(Date())
+            .expiration(Date(expirationTimeInMillis))
+            .claim("role", role)
+            .claim("version", version)
+            .signWith(
+                Keys.hmacShaKeyFor(secretKey.toByteArray(StandardCharsets.UTF_8)),
+                Jwts.SIG.HS512
+            )
+            .compact()
+    }
 
-	@Value("${token.jwt.refresh-token-expiration}")
-	private Integer refreshTokenExpiration;
+    fun validateAccessToken(
+        token: String
+    ): Claims {
+        val claims = runCatching {
+            val key = Keys.hmacShaKeyFor(secretKey.toByteArray(StandardCharsets.UTF_8))
+            Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .payload
+        }.getOrElse { throw CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN) }
+        val subject = claims.subject ?: throw CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN)
+        val parts = subject.split(", ")
+        if (parts.size != 2) throw CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN)
+        val (userIdStr, _) = parts
 
-	@Autowired
-	private RefreshTokenRepository refreshTokenRepository;
+        val userId = runCatching { UUID.fromString(userIdStr) }.getOrNull()
+            ?: throw CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN)
+        val tokenVersion = claims["version"] ?: throw CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN)
+        val latestToken = refreshTokenRepository.findLatestRefreshTokenByUserId(userId)
+            ?: throw CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN)
 
-	public JwtUtility() {
-	}
+        if (latestToken.tokenVersion != tokenVersion) {
+            throw CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN)
+        }
 
-	public String generateAccessToken(Member member, Integer tokenVersion) {
-		if (member == null || member.getId() == null || member.getUsername() == null) {
-			throw new CoffeeTimeException(EntryPayloadCode.NOT_FOUND_USER);
-		}
-		String subject = String.format("%s, %s", member.getId(), member.getUsername());
-		return generateToken(subject, accessTokenExpiration, member.getRole().name(), tokenVersion);
-	}
-
-	private String generateToken(String subject, Integer expirationMinutes, String role,
-		Integer version) {
-		long expirationTimeInMillis = System.currentTimeMillis() + expirationMinutes * 60 * 1000;
-		return Jwts.builder()
-			.subject(subject)
-			.issuer(tokenIssuer)
-			.issuedAt(new Date())
-			.expiration(new Date(expirationTimeInMillis))
-			.claim("role", role)
-			.claim("version", version)
-			.signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)),
-				Jwts.SIG.HS512)
-			.compact();
-	}
-
-	public String generateRefreshToken() {
-		return generateToken("", refreshTokenExpiration, "", 0);
-	}
-
-	public Claims validateAccessToken(String token) throws JwtValidationException {
-		try {
-			final SecretKeySpec keySpec = new SecretKeySpec(
-				secretKey.getBytes(StandardCharsets.UTF_8),
-				"HmacSHA512"
-			);
-			final Claims claims = Jwts.parser()
-				.verifyWith(keySpec)
-				.build()
-				.parseSignedClaims(token)
-				.getPayload();
-			final String subject = claims.getSubject();
-			final String[] parts = subject.split(", ");
-			final Integer tokenVersion = claims.get("version", Integer.class);
-			if (!subject.contains(", ") || parts.length != 2) {
-				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
-			}
-			if (tokenVersion == null) {
-				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
-			}
-			UUID userId;
-			try {
-				userId = UUID.fromString(parts[0]);
-			} catch (IllegalArgumentException e) {
-				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
-			}
-			final Optional<RefreshToken> latestToken = refreshTokenRepository.findLatestByMember(
-				Member.createFromClaims(
-					userId,
-					parts[1].trim(),
-					RoleType.valueOf((String) claims.get("role"))
-				)
-			);
-			if (latestToken.isEmpty() || !latestToken.get().getTokenVersion()
-				.equals(tokenVersion)) {
-				throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
-			}
-			return claims;
-		} catch (CoffeeTimeException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new CoffeeTimeException(EntryPayloadCode.INVALID_TOKEN);
-		}
-	}
-
-	public void updateTokenIssuer(String tokenIssuer) {
-		this.tokenIssuer = tokenIssuer;
-	}
-
-	public void updateSecretKey(String secretKey) {
-		this.secretKey = secretKey;
-	}
-
-	public void updateAccessTokenExpiration(Integer accessTokenExpiration) {
-		this.accessTokenExpiration = accessTokenExpiration;
-	}
-
+        return claims
+    }
 }

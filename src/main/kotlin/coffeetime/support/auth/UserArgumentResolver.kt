@@ -28,9 +28,7 @@ class UserArgumentResolver : HandlerMethodArgumentResolver {
             user.loginType,
             user.nickname,
             user.password,
-            user.role,
-            user.createdAt,
-            user.updatedAt
+            user.role
         )
     }
 }

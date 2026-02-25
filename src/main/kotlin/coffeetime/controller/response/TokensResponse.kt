@@ -1,8 +1,6 @@
 package coffeetime.controller.response;
 
-public record TokensResponse(
-	String accessToken,
-	String refreshToken
-) {
-
-}
+data class TokensResponse(
+	val accessToken: String,
+	val refreshToken: String
+)

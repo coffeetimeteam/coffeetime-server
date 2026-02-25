@@ -12,15 +12,7 @@ class UserFinder(
     private val customUserDetailsService: CustomUserDetailsService,
 ) {
 
-
-    fun existsByUsername(username: String) {
-        if (userRepository.existsByUsername(username)) {
-            throw CoffeeTimeException(EntryPayloadCode.DUPLICATED_USER)
-        }
-    }
-
-
-    fun getUserInfo(): User {
+    fun findUserInfo(): User {
         val customUserDetails: CustomUserDetails = customUserDetailsService.getCurrentUserDetails()
         val username = customUserDetails.getUsername()
         val user = userRepository.findByUsername(username).orElseThrow { CoffeeTimeException(EntryPayloadCode.NOT_FOUND_USER) }
@@ -35,4 +27,11 @@ class UserFinder(
             user.updatedAt
         )
     }
+
+    fun existsByUsername(username: String) {
+        if (userRepository.existsByUsername(username)) {
+            throw CoffeeTimeException(EntryPayloadCode.DUPLICATED_USER)
+        }
+    }
+
 }

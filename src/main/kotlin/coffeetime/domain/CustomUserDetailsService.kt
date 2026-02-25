@@ -1,14 +1,14 @@
-package coffeetime.domain;
+package coffeetime.domain
 
 import coffeetime.repository.UserEntity
 import coffeetime.repository.UserRepository
-import coffeetime.support.auth.CustomUserDetails;
-import org.springframework.security.core.context.SecurityContextHolder;
+import coffeetime.support.auth.CustomUserDetails
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CustomUserDetailsService (

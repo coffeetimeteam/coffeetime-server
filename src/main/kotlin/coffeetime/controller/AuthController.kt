@@ -1,4 +1,4 @@
-package coffeetime.controller;
+package coffeetime.controller
 
 import coffeetime.config.SecurityRequiredOperation;
 import coffeetime.controller.request.LoginRequest;
@@ -7,6 +7,7 @@ import coffeetime.controller.response.TokensResponse;
 import coffeetime.domain.AuthService;
 import coffeetime.domain.TokenService;
 import coffeetime.support.error.EntryPayloadCode;
+import coffeetime.support.response.ApiStatus
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -19,22 +20,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
-public class AuthController {
-
-	private final TokenService tokenService;
-	private final AuthService authService;
+class AuthController(
+	private val authService: AuthService,
+	private val tokenService: TokenService,
+) {
 
 	@PostMapping("/login")
-	public ResponseEntity<TokensResponse> login(@RequestBody @Valid LoginRequest request) {
-		final TokensResponse userTokens = authService.loginTokens(request);
-		return ResponseEntity.ok().body(userTokens);
+	fun login(@RequestBody @Valid request: LoginRequest): ResponseEntity<TokensResponse>  {
+		val userTokens: TokensResponse = authService.loginTokens(request.username, request.password)
+		return ResponseEntity.ok().body(userTokens)
 	}
 
 	@PostMapping("/logout")
-	public ResponseEntity<GlobalResponse> logout(
-		@RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+	fun logout(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<ApiStatus> {
 		tokenService.deleteRefreshToken(token);
 		return ResponseEntity.ok().body(new GlobalResponse(EntryPayloadCode.SUCCESS_LOGOUT));
 	}

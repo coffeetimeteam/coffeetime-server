@@ -1,8 +1,8 @@
 package coffeetime.domain
 
-import coffeetime.domain.type.LoginType
-import coffeetime.domain.type.RoleType
-import java.time.LocalDateTime
+import coffeetime.enums.LoginType
+import coffeetime.enums.RoleType
+import coffeetime.repository.UserEntity
 import java.util.UUID
 
 data class User(
@@ -11,7 +11,20 @@ data class User(
     val loginType: LoginType,
     val nickname: String,
     val password: String,
-    val role: RoleType,
-    val createAt: LocalDateTime,
-    val updatedAt: LocalDateTime
-)
+    val role: RoleType
+) {
+
+    companion object {
+
+        fun from(userEntity: UserEntity): User {
+                return User(
+                    userEntity.id,
+                    userEntity.username,
+                    userEntity.loginType,
+                    userEntity.nickname,
+                    userEntity.password,
+                    userEntity.role,
+                )
+        }
+    }
+}

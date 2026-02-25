@@ -1,10 +1,9 @@
 package coffeetime.repository
 
-import coffeetime.domain.type.LoginType
-import coffeetime.domain.type.RoleType
+import coffeetime.enums.LoginType
+import coffeetime.enums.RoleType
 import jakarta.persistence.*
 import jakarta.validation.constraints.Size
-import java.util.*
 
 @Entity
 @Table(name = "member")

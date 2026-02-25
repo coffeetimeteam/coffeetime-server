@@ -1,28 +1,27 @@
-package coffeetime.repository;
+package coffeetime.repository
 
-import coffeetime.domain.RefreshToken;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
+import java.util.UUID
 
-@Repository
-public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Integer> {
+interface RefreshTokenRepository: JpaRepository<RefreshTokenEntity, Long> {
 
-	Optional<RefreshToken> findByToken(String refreshToken);
+	fun findByToken(refreshToken: String): RefreshTokenEntity
 
-	@Query("select rt from RefreshToken rt where rt.member.username = ?1")
-	List<RefreshToken> findByUsername(String username);
+	@Query("SELECT token FROM RefreshTokenEntity token WHERE token.userId = ?1")
+	fun findByUserId(useId: Long): List<RefreshTokenEntity>
 
 	@Modifying
-	@Query("delete from RefreshToken rt where rt.expiredAt <= current_timestamp")
-	int deleteByExpiredAt();
+	@Query("DELETE FROM RefreshTokenEntity toekn WHERE toekn.expiredAt <= current_timestamp")
+	fun deleteByExpiredAt(): Int
 
-	@Query(value = "select rt from RefreshToken rt where rt.member = :memberId order by rt.id desc "
-		+ "limit 1")
-	Optional<RefreshToken> findLatestByMember(@Param("memberId") UUID memberId);
+	@Query("""
+		SELECT token FROM RefreshTokenEntity token
+		WHERE token.userId = :userId 
+		ORDER BY token.id DESC LIMIT 1
+		""",
+	)
+	fun findLatestRefreshTokenByUserId(memberId: UUID): RefreshTokenEntity
 }
